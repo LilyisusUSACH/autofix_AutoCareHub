@@ -8,6 +8,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.Year;
+
 
 @Data
 @AllArgsConstructor
@@ -32,6 +35,8 @@ public class VehicleEntity{
     private ECarType carType;
 
     private EMotorType motorType;
+
+    private Year fabricationYear;
 
     private int nAsientos;
 

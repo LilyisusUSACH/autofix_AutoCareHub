@@ -47,7 +47,7 @@ public class ReparationEntity {
     @JsonFormat(pattern="HH:mm:ss")
     private LocalTime horaRetiro;
 
-    private float montoTotal;
+    private int montoTotal;
 
     @ManyToOne()
     @JoinColumn(name = "boleta")
