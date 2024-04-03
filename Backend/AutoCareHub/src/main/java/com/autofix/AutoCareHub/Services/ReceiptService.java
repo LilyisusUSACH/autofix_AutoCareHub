@@ -57,7 +57,7 @@ public class ReceiptService {
     }
     //
     public Optional<ReceiptEntity> findReceiptUnpaidByPatente(String patente){
-        return receiptRepository.findByPatente_PatenteAAndAndPagadoIsFalse(patente);
+        return receiptRepository.findByPatente_PatenteAndPagadoIsFalse(patente);
     }
     // save
 

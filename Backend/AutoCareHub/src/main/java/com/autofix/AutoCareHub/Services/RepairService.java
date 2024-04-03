@@ -16,6 +16,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+//TODO: UPDATES Y SAVES
+
 @Service
 public class RepairService {
     @Autowired
@@ -59,7 +61,7 @@ public class RepairService {
 
     // count n repair 12 meses
     public int countRepairsInUltimate12Month(VehicleEntity vehicle){
-        return reparationRepository.countByFechaIngresoBetweenAnAndReceipt_Patente(LocalDate.now(), LocalDate.now().minusMonths(12), vehicle);
+        return reparationRepository.countByFechaIngresoBetweenAndReceipt_Patente(LocalDate.now(), LocalDate.now().minusMonths(12), vehicle);
     }
 
     // save
