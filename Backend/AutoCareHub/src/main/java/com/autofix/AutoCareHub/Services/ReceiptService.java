@@ -1,9 +1,7 @@
 package com.autofix.AutoCareHub.Services;
 
 import com.autofix.AutoCareHub.Controllers.Request.RegisterReparationDTO;
-import com.autofix.AutoCareHub.Entities.ReceiptEntity;
-import com.autofix.AutoCareHub.Entities.ReparationEntity;
-import com.autofix.AutoCareHub.Entities.VehicleEntity;
+import com.autofix.AutoCareHub.Entities.*;
 import com.autofix.AutoCareHub.Enums.EDiscNRep;
 import com.autofix.AutoCareHub.Enums.ERecKm;
 import com.autofix.AutoCareHub.Enums.ERecOld;
@@ -35,6 +33,8 @@ public class ReceiptService {
     @Autowired
     RepairService repairService;
 
+    @Autowired
+    BonoService bonoService;
     // get
 
         // find all
@@ -70,6 +70,7 @@ public class ReceiptService {
                         vehicleService.getVehicleByPatente(patente).orElseThrow()
                 )
                 .costoTotal(0)
+                .detail(new ArrayList<>())
                 .reparaciones(new ArrayList<>())
                 .build();
         receiptRepository.save(receipt);
@@ -211,10 +212,13 @@ public class ReceiptService {
         for (ReparationEntity reparation : receipt.getReparaciones()) {
             sumaRep += reparation.getMontoTotal();
         }
+        //receipt.getDetail().add("La suma de las reparaciones es :");
         int discounts = nReparationsDiscount(receipt.getPatente(),sumaRep) +
                 ingresoDiscount(receipt, sumaRep);
         if(applyBono){
-            discounts += 0; // TODO: hacer esto cuando termine el bono service
+            Optional<BonoEntity> bono = bonoService.findBonoDisponibleByMarca(receipt.getPatente().getMarca());
+            if (bono.isPresent())
+                discounts += bono.get().getAmount(); // TODO: hacer esto cuando termine el bono service
         }
         int recargos = kmRecargo(receipt.getPatente(), sumaRep) +
                 oldRecargo(receipt.getPatente(), sumaRep) +

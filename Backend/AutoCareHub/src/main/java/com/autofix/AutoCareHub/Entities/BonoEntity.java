@@ -23,6 +23,8 @@ public class BonoEntity {
 
     private Boolean usado;
 
+    private int amount;
+
     @OneToOne()
     @JoinColumn(name = "vehiculo_id")
     private VehicleEntity vehicle;

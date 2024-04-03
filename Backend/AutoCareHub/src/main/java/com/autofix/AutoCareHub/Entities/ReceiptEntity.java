@@ -30,6 +30,10 @@ public class ReceiptEntity {
     @OneToMany(mappedBy = "receipt")
     private List<ReparationEntity> reparaciones = new ArrayList<>();
 
+    //@Embeddable
+    //@CollectionTable(name="detalles")
+    //private ArrayList<Integer> detail = new ArrayList<Integer>();
+
     private Boolean retirado;
 
     private Boolean pagado;
