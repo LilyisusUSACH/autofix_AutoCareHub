@@ -40,6 +40,10 @@ public class RepairService {
         return reparationRepository.findByReceipt_PatentePatente(patente);
     }
 
+    public ArrayList<ReparationEntity> getReparationsByPatente(String patente){
+        return (ArrayList<ReparationEntity>) reparationRepository.findAllByReceipt_PatentePatente(patente);
+    }
+
         // Find first order by fecha ingreso
     public Optional<ReparationEntity> getFirstIngresadoByReceipt(ReceiptEntity receipt){
         return reparationRepository.findFirstByReceiptOrderByFechaIngresoDesc(receipt);
@@ -93,7 +97,8 @@ public class RepairService {
 
     // Update TODO: añadir salida (ya reparado) y retiro
 
-    public ReparationEntity reparationComplete(ReparationEntity reparation){
+    public ReparationEntity reparationComplete(Long id){
+        ReparationEntity reparation = getReparationById(id).orElseThrow();
         reparation.setFechaSalida(LocalDate.now());
         reparation.setHoraSalida(LocalTime.now());
         return saveReparation(reparation);

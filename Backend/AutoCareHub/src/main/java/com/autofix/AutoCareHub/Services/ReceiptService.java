@@ -70,6 +70,7 @@ public class ReceiptService {
                         vehicleService.getVehicleByPatente(patente).orElseThrow()
                 )
                 .costoTotal(0)
+                .reparaciones(new ArrayList<>())
                 .build();
         receiptRepository.save(receipt);
         return receipt;
@@ -98,17 +99,11 @@ public class ReceiptService {
                         }
                 )
                 .build();
-        addReparationToReceipt(receipt,reparation);
+        receipt.getReparaciones().add(reparation);
+        reparation.setReceipt(receipt);
         repairService.saveReparation(reparation);
         saveReceipt(receipt);
         return reparation;
-    }
-
-
-    public ReceiptEntity addReparationToReceipt(ReceiptEntity receipt, ReparationEntity reparation){
-        receipt.getReparaciones().add(reparation);
-        reparation.setReceipt(receipt);
-        return saveReceipt(receipt);
     }
 
     public ReceiptEntity delivered(String patente){
@@ -203,8 +198,8 @@ public class ReceiptService {
     }
 
     public int retrasoRecargo(ReceiptEntity receipt, int costoReparaciones){
-        ArrayList<ReparationEntity> reparations = (ArrayList<ReparationEntity>) receipt.getReparaciones();
-        reparations.sort(Comparator.comparing(ReparationEntity::getFechaSalida).reversed());
+        ArrayList<ReparationEntity> reparations = new ArrayList<>(receipt.getReparaciones());
+        reparations.sort(Comparator.comparing(ReparationEntity::getFechaSalida));
         int diference = (int) DAYS.between(LocalDate.now(),reparations.get(0).getFechaSalida());
         return Math.round( costoReparaciones * (diference * 0.05f));
     }
@@ -222,8 +217,11 @@ public class ReceiptService {
             discounts += 0; // TODO: hacer esto cuando termine el bono service
         }
         int recargos = kmRecargo(receipt.getPatente(), sumaRep) +
-                oldRecargo(receipt.getPatente(), sumaRep);
-
+                oldRecargo(receipt.getPatente(), sumaRep) +
+                retrasoRecargo(receipt, sumaRep);
+        int costoTotal =  (sumaRep - discounts + recargos);
+        costoTotal = Math.round(costoTotal*(1+IVA));
+        receipt.setCostoTotal(costoTotal);
         return saveReceipt(receipt);
     }
     //     public ReceiptEntity calculateAmountByReceipt(ReceiptEntity receipt){

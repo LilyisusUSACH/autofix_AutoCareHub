@@ -6,6 +6,7 @@ import com.autofix.AutoCareHub.Repositories.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -50,6 +51,7 @@ public class VehicleService {
                 .motorType(vehicleDTO.getMotorType())
                 .nAsientos(vehicleDTO.getNAsientos())
                 .kmRecorridos(vehicleDTO.getKmRecorridos())
+                .fabricationYear(Year.of(vehicleDTO.getFabricationYear()))
                 .build();
         vehicleRepository.save(vehicle);
         return vehicle;

@@ -1,6 +1,8 @@
 package com.autofix.AutoCareHub.Entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -51,6 +53,12 @@ public class ReparationEntity {
 
     @ManyToOne()
     @JoinColumn(name = "boleta")
+    @JsonIgnore
     private ReceiptEntity receipt;
+
+    @JsonGetter("receipt_id")
+    private long receiptId(){
+        return receipt.getId();
+    }
 
 }

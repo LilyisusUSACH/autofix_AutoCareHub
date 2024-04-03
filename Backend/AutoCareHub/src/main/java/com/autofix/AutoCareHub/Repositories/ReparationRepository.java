@@ -16,6 +16,8 @@ public interface ReparationRepository extends JpaRepository<ReparationEntity, Lo
 
     Optional<ReparationEntity> findFirstByReceiptOrderByFechaIngresoDesc(ReceiptEntity receipt);
 
+    List<ReparationEntity> findAllByReceipt_PatentePatente(String patente);
+
     List<ReparationEntity> findAllByFechaIngresoAndReceipt(LocalDate fecha, ReceiptEntity receipt);
 
     int countByFechaIngresoBetweenAndReceipt_Patente(LocalDate inicio, LocalDate termino, VehicleEntity patente);

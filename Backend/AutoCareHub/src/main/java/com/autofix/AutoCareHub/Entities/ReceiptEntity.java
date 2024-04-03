@@ -28,7 +28,6 @@ public class ReceiptEntity {
     private VehicleEntity patente;
 
     @OneToMany(mappedBy = "receipt")
-    @JsonIgnore
     private List<ReparationEntity> reparaciones = new ArrayList<>();
 
     private Boolean retirado;
