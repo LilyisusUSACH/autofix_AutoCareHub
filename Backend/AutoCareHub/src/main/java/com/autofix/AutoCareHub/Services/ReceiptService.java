@@ -1,5 +1,6 @@
 package com.autofix.AutoCareHub.Services;
 
+import com.autofix.AutoCareHub.Controllers.Request.RegisterReparationDTO;
 import com.autofix.AutoCareHub.Entities.ReceiptEntity;
 import com.autofix.AutoCareHub.Entities.ReparationEntity;
 import com.autofix.AutoCareHub.Entities.VehicleEntity;
@@ -62,7 +63,7 @@ public class ReceiptService {
     // save
 
     public ReceiptEntity createReceiptEmpty(String patente){ // TODO: cambiar el elseThrow
-        return ReceiptEntity.builder()
+        ReceiptEntity receipt =  ReceiptEntity.builder()
                 .pagado(false)
                 .retirado(false)
                 .patente(
@@ -70,14 +71,44 @@ public class ReceiptService {
                 )
                 .costoTotal(0)
                 .build();
+        receiptRepository.save(receipt);
+        return receipt;
+    }
+
+    public ReceiptEntity saveReceipt(ReceiptEntity receipt){
+        return receipt;
     }
 
     // update
 
+    public ReparationEntity registerReparation(RegisterReparationDTO reparationDTO){
+        int[] a = ERepValue.DIESEL.getValues();
+        Optional<ReceiptEntity> optionalReceipt = findReceiptUnpaidByPatente(reparationDTO.getPatente());
+        ReceiptEntity receipt = optionalReceipt.orElseGet(() -> createReceiptEmpty(reparationDTO.getPatente()));
+        ReparationEntity reparation = ReparationEntity.builder()
+                .fechaIngreso(LocalDate.now())
+                .horaIngreso(LocalTime.now())
+                .typeRep(reparationDTO.getTypeRep())
+                .montoTotal(
+                        switch (receipt.getPatente().getMotorType()){
+                            case gasolina -> ERepValue.GASOLINA.getValues()[reparationDTO.getTypeRep()];
+                            case diesel -> ERepValue.DIESEL.getValues()[reparationDTO.getTypeRep()];
+                            case hibrido -> ERepValue.HIBRIDO.getValues()[reparationDTO.getTypeRep()];
+                            case electrico -> ERepValue.ELECTRICO.getValues()[reparationDTO.getTypeRep()];
+                        }
+                )
+                .build();
+        addReparationToReceipt(receipt,reparation);
+        repairService.saveReparation(reparation);
+        saveReceipt(receipt);
+        return reparation;
+    }
+
+
     public ReceiptEntity addReparationToReceipt(ReceiptEntity receipt, ReparationEntity reparation){
         receipt.getReparaciones().add(reparation);
         reparation.setReceipt(receipt);
-        return receipt;
+        return saveReceipt(receipt);
     }
 
     public ReceiptEntity delivered(String patente){
@@ -87,7 +118,7 @@ public class ReceiptService {
         for (ReparationEntity reparation : receipt.getReparaciones()) {
             repairService.reparationDelivered(reparation);
         }
-        return receipt;
+        return saveReceipt(receipt);
     }
 
     public int nReparationsDiscount(VehicleEntity vehicle, int costoReparaciones){
@@ -193,7 +224,7 @@ public class ReceiptService {
         int recargos = kmRecargo(receipt.getPatente(), sumaRep) +
                 oldRecargo(receipt.getPatente(), sumaRep);
 
-        return receipt;
+        return saveReceipt(receipt);
     }
     //     public ReceiptEntity calculateAmountByReceipt(ReceiptEntity receipt){
     // delete

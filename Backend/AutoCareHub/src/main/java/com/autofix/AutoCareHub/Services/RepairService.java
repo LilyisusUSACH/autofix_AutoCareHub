@@ -23,8 +23,6 @@ public class RepairService {
     @Autowired
     ReparationRepository reparationRepository;
 
-    @Autowired
-    ReceiptService receiptService;
     // get
 
         // Find all
@@ -66,40 +64,45 @@ public class RepairService {
 
     // save
 
-    // Deberia crear la boleta aca? o es trabajo del receipt service(? no lo sabremos ah sdjkjkds
-    public ReparationEntity registerReparation(RegisterReparationDTO reparationDTO){
-        int[] a = ERepValue.DIESEL.getValues();
-        Optional<ReceiptEntity> optionalReceipt = receiptService.findReceiptUnpaidByPatente(reparationDTO.getPatente());
-        ReceiptEntity receipt = optionalReceipt.orElseGet(() -> receiptService.createReceiptEmpty(reparationDTO.getPatente()));
-        ReparationEntity reparation = ReparationEntity.builder()
-                .fechaIngreso(LocalDate.now())
-                .horaIngreso(LocalTime.now())
-                .typeRep(reparationDTO.getTypeRep())
-                .montoTotal(
-                        switch (receipt.getPatente().getMotorType()){
-                            case gasolina -> ERepValue.GASOLINA.getValues()[reparationDTO.getTypeRep()];
-                            case diesel -> ERepValue.DIESEL.getValues()[reparationDTO.getTypeRep()];
-                            case hibrido -> ERepValue.HIBRIDO.getValues()[reparationDTO.getTypeRep()];
-                            case electrico -> ERepValue.ELECTRICO.getValues()[reparationDTO.getTypeRep()];
-                        }
-                )
-                .build();
-        receiptService.addReparationToReceipt(receipt,reparation);
+    public ReparationEntity saveReparation(ReparationEntity reparation){
+        reparationRepository.save(reparation);
         return reparation;
     }
+
+    // Deberia crear la boleta aca? o es trabajo del receipt service(? no lo sabremos ah sdjkjkds
+//    public ReparationEntity registerReparation(RegisterReparationDTO reparationDTO){
+//        int[] a = ERepValue.DIESEL.getValues();
+//        Optional<ReceiptEntity> optionalReceipt = receiptService.findReceiptUnpaidByPatente(reparationDTO.getPatente());
+//        ReceiptEntity receipt = optionalReceipt.orElseGet(() -> receiptService.createReceiptEmpty(reparationDTO.getPatente()));
+//        ReparationEntity reparation = ReparationEntity.builder()
+//                .fechaIngreso(LocalDate.now())
+//                .horaIngreso(LocalTime.now())
+//                .typeRep(reparationDTO.getTypeRep())
+//                .montoTotal(
+//                        switch (receipt.getPatente().getMotorType()){
+//                            case gasolina -> ERepValue.GASOLINA.getValues()[reparationDTO.getTypeRep()];
+//                            case diesel -> ERepValue.DIESEL.getValues()[reparationDTO.getTypeRep()];
+//                            case hibrido -> ERepValue.HIBRIDO.getValues()[reparationDTO.getTypeRep()];
+//                            case electrico -> ERepValue.ELECTRICO.getValues()[reparationDTO.getTypeRep()];
+//                        }
+//                )
+//                .build();
+//        receiptService.addReparationToReceipt(receipt,reparation);
+//        return reparation;
+//    }
 
     // Update TODO: añadir salida (ya reparado) y retiro
 
     public ReparationEntity reparationComplete(ReparationEntity reparation){
         reparation.setFechaSalida(LocalDate.now());
         reparation.setHoraSalida(LocalTime.now());
-        return reparation;
+        return saveReparation(reparation);
     }
 
     public ReparationEntity reparationDelivered(ReparationEntity reparation){
         reparation.setFechaRetiro(LocalDate.now());
         reparation.setHoraRetiro(LocalTime.now());
-        return reparation;
+        return saveReparation(reparation);
     }
     // delete ?
 
