@@ -2,14 +2,12 @@ package com.autofix.AutoCareHub.Services;
 
 import com.autofix.AutoCareHub.Controllers.Request.RegisterReparationDTO;
 import com.autofix.AutoCareHub.Entities.*;
-import com.autofix.AutoCareHub.Enums.EDiscNRep;
-import com.autofix.AutoCareHub.Enums.ERecKm;
-import com.autofix.AutoCareHub.Enums.ERecOld;
-import com.autofix.AutoCareHub.Enums.ERepValue;
+import com.autofix.AutoCareHub.Enums.*;
 import com.autofix.AutoCareHub.Repositories.ReceiptRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.Console;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -35,6 +33,10 @@ public class ReceiptService {
 
     @Autowired
     BonoService bonoService;
+
+    @Autowired
+    DetailService detailService;
+
     // get
 
         // find all
@@ -70,7 +72,7 @@ public class ReceiptService {
                         vehicleService.getVehicleByPatente(patente).orElseThrow()
                 )
                 .costoTotal(0)
-                .detail(new ArrayList<>())
+                //.detail(new ArrayList<>())
                 .reparaciones(new ArrayList<>())
                 .build();
         receiptRepository.save(receipt);
@@ -78,6 +80,7 @@ public class ReceiptService {
     }
 
     public ReceiptEntity saveReceipt(ReceiptEntity receipt){
+        receiptRepository.save(receipt);
         return receipt;
     }
 
@@ -117,7 +120,8 @@ public class ReceiptService {
         return saveReceipt(receipt);
     }
 
-    public int nReparationsDiscount(VehicleEntity vehicle, int costoReparaciones){
+    public int nReparationsDiscount(ReceiptEntity receipt, int costoReparaciones){
+        VehicleEntity vehicle = receipt.getPatente();
         int cantidad = repairService.countRepairsInUltimate12Month(vehicle);
         if(cantidad == 0){
             return 0;
@@ -128,6 +132,8 @@ public class ReceiptService {
             case hibrido -> EDiscNRep.HIBRIDO.getValues()[cantidad];
             case electrico -> EDiscNRep.ELECTRICO.getValues()[cantidad];
         };
+        detailService.createDetail(EDiscountsRecharges.descuento_reparaciones,
+                Math.round(costoReparaciones*discount) , discount, receipt);
         return Math.round(costoReparaciones*discount);
         // TODO: ver si redondear o truncar ((int) el casteo trunca) o tirar para arriba (Math.ceil(f))D:
     }
@@ -136,6 +142,8 @@ public class ReceiptService {
         ReparationEntity reparationFirstFecha = repairService.getFirstIngresadoByReceipt(receipt).orElseThrow(); // obtengo el primero en ingresar
         ReparationEntity reparation = repairService.getFirstInADay(reparationFirstFecha.getFechaIngreso(), receipt);
 
+        float descuento = 0.1f;// TODO: pasar a constante
+
         DayOfWeek ingresoDay = reparation.getFechaIngreso().getDayOfWeek();
 
         LocalTime ingresoHours = reparation.getHoraIngreso();
@@ -143,16 +151,25 @@ public class ReceiptService {
         LocalTime start = LocalTime.parse( HoraInicioDescuento );
         LocalTime end = LocalTime.parse( HoraTerminoDescuento );
 
+//        System.out.println(ingresoDay);
+//        System.out.println(ingresoHours);
+        
         if( ingresoDay.getValue() == DayOfWeek.MONDAY.getValue()
                 || ingresoDay.getValue() == DayOfWeek.THURSDAY.getValue()){
+
             if(ingresoHours.isAfter(start) && ingresoHours.isBefore(end)){
-             return Math.round(costoReparaciones*0.1f);
+                detailService.createDetail(EDiscountsRecharges.descuento_dia,
+                        Math.round(costoReparaciones*descuento), descuento, receipt);
+             return Math.round(costoReparaciones*descuento);
             }
         }
+        detailService.createDetail(EDiscountsRecharges.descuento_dia,
+                0, 0f, receipt);
         return 0;
     }
 
-    public int kmRecargo(VehicleEntity vehicle, int costoReparaciones){
+    public int kmRecargo(ReceiptEntity receipt, int costoReparaciones){
+        VehicleEntity vehicle = receipt.getPatente();
         int km = vehicle.getKmRecorridos();
         int categoria;
         if(km <= 5000){
@@ -173,10 +190,13 @@ public class ReceiptService {
             case pickup -> ERecKm.PICKUP.getValues()[categoria];
             case furgoneta -> ERecKm.FURGONETA.getValues()[categoria];
         };
+        detailService.createDetail(EDiscountsRecharges.recargo_km,
+                Math.round(costoReparaciones*recargo), recargo, receipt);
         return Math.round(costoReparaciones*recargo);
     }
 
-    public int oldRecargo(VehicleEntity vehicle, int costoReparaciones){
+    public int oldRecargo(ReceiptEntity receipt, int costoReparaciones){
+        VehicleEntity vehicle = receipt.getPatente();
         int antiguedad = Year.now().minusYears(vehicle.getFabricationYear().getValue()).getValue();
         int categoria;
         if(antiguedad <= 5){
@@ -195,38 +215,52 @@ public class ReceiptService {
             case pickup -> ERecOld.PICKUP.getValues()[categoria];
             case furgoneta -> ERecOld.FURGONETA.getValues()[categoria];
         };
+        detailService.createDetail(EDiscountsRecharges.recargo_antiguedad,
+                Math.round(costoReparaciones*recargo), recargo, receipt);
         return Math.round(costoReparaciones*recargo);
     }
 
     public int retrasoRecargo(ReceiptEntity receipt, int costoReparaciones){
         ArrayList<ReparationEntity> reparations = new ArrayList<>(receipt.getReparaciones());
-        reparations.sort(Comparator.comparing(ReparationEntity::getFechaSalida));
-        int diference = (int) DAYS.between(LocalDate.now(),reparations.get(0).getFechaSalida());
+        reparations.sort(Comparator.comparing(ReparationEntity::getFechaSalida).reversed());
+        int diference = (int) DAYS.between(reparations.get(0).getFechaSalida(), LocalDate.now());
+        detailService.createDetail(EDiscountsRecharges.recargo_retraso,
+                Math.round( costoReparaciones * (diference * 0.05f)),  (diference * 0.05f), receipt);
+
         return Math.round( costoReparaciones * (diference * 0.05f));
     }
 
     public ReceiptEntity calculateAmountByPatente(String patente, Boolean applyBono){
         Optional<ReceiptEntity> optionalReceipt = findReceiptUnpaidByPatente(patente);
         ReceiptEntity receipt = optionalReceipt.orElseThrow();
-        int sumaRep = 0;
-        for (ReparationEntity reparation : receipt.getReparaciones()) {
-            sumaRep += reparation.getMontoTotal();
-        }
+        int sumaRep = receipt.getReparaciones().stream().mapToInt(ReparationEntity::getMontoTotal).sum();
+//        for (ReparationEntity reparation : receipt.getReparaciones()) {
+//            sumaRep += reparation.getMontoTotal();
+//        }
+        detailService.createDetail(EDiscountsRecharges.suma_reparacion,
+                sumaRep, 1, receipt);
         //receipt.getDetail().add("La suma de las reparaciones es :");
-        int discounts = nReparationsDiscount(receipt.getPatente(),sumaRep) +
+
+        int discounts = nReparationsDiscount(receipt,sumaRep) +
                 ingresoDiscount(receipt, sumaRep);
-        if(applyBono){
+        if(applyBono) {
             Optional<BonoEntity> bono = bonoService.findBonoDisponibleByMarca(receipt.getPatente().getMarca());
-            if (bono.isPresent())
-                discounts += bono.get().getAmount(); // TODO: hacer esto cuando termine el bono service
+            if (bono.isPresent()) {
+                discounts += bonoService.useBono(bono.get(), receipt.getPatente()); // TODO: hacer esto cuando termine el bono service
+                detailService.createDetail(EDiscountsRecharges.descuento_bono,
+                        bono.get().getAmount(), 1, receipt);
+            }
         }
-        int recargos = kmRecargo(receipt.getPatente(), sumaRep) +
-                oldRecargo(receipt.getPatente(), sumaRep) +
+        int recargos = kmRecargo(receipt, sumaRep) +
+                oldRecargo(receipt, sumaRep) +
                 retrasoRecargo(receipt, sumaRep);
         int costoTotal =  (sumaRep - discounts + recargos);
+        detailService.createDetail(EDiscountsRecharges.iva,
+                Math.round(costoTotal*IVA), IVA, receipt);
         costoTotal = Math.round(costoTotal*(1+IVA));
         receipt.setCostoTotal(costoTotal);
-        return saveReceipt(receipt);
+        saveReceipt(receipt);
+        return receipt;
     }
     //     public ReceiptEntity calculateAmountByReceipt(ReceiptEntity receipt){
     // delete

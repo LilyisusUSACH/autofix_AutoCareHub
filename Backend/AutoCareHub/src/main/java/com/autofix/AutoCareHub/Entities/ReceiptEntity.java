@@ -34,6 +34,9 @@ public class ReceiptEntity {
     //@CollectionTable(name="detalles")
     //private ArrayList<Integer> detail = new ArrayList<Integer>();
 
+    @OneToMany(mappedBy = "receipt")
+    private List<DetailEntity> details = new ArrayList<>();
+
     private Boolean retirado;
 
     private Boolean pagado;

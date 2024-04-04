@@ -25,7 +25,7 @@ public class VehicleEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // @Column(unique=true) o verificar con service si ya existe
+    @Column(unique=true) // o verificar con service si ya existe
     private String patente;
 
     private String marca;

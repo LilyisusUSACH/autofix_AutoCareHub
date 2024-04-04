@@ -40,7 +40,12 @@ public class ReceiptController {
 
     @PostMapping("/patente")
     public ResponseEntity<?> calcularTotal(@RequestParam("patente") String patente, @RequestParam("bono") Boolean applyBono ){
-        return ResponseEntity.ok( receiptService.calculateAmountByPatente(patente, applyBono) );
+        try{
+            return ResponseEntity.ok( receiptService.calculateAmountByPatente(patente, applyBono) );
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("Error, debe primero finalizar las reparaciones");
+
+        }
     }
 
 }
