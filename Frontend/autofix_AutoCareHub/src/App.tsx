@@ -4,6 +4,7 @@ import './App.css'
 import HelloWorld from './components/HelloWorld'
 import WorkshopRouter from './routers/WorkshopRouter'
 import ClientRouter from './routers/ClientRouter'
+import MyVehicleRouter from './routers/MyVehicleRouter'
 
 function App() {
 
@@ -11,9 +12,9 @@ function App() {
     <Router>
           <div>
             <Routes>
-              <Route path="/" element={<ClientRouter/>}/>
+              <Route path="/*" element={<ClientRouter/>}/>
+              <Route path='/MyVehicle' element={<MyVehicleRouter/>}/>
               <Route path="/workshop/*" element={<WorkshopRouter/>} />
-              <Route path="*" element={<HelloWorld/>} />
             </Routes>
           </div>
     </Router>
