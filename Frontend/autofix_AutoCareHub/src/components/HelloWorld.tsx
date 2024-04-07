@@ -1,59 +1,47 @@
-import { Box, Slide, Typography, useScrollTrigger } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Grid } from "@mui/material";
 import backImg from "../assets/engranaje.png";
-import ScrollRotateImage from "./ScrollRotateImage";
-import './a.css'
+import "./a.css";
 
-interface Props {
-  /**
-   * Injected by the documentation to work in an iframe.
-   * You won't need it on your project.
-   */
-  window?: () => Window;
-  children: React.ReactElement;
-}
+const HelloWorld = ({children}) => {
+  const [isDowning, setIsDowning] = useState(false);
 
-function HideOnScroll(props: Props) {
-  const { children, window } = props;
-  const trigger = useScrollTrigger({
-    target: window ? window() : undefined,
-  });
+  const handleOnMove = () => {
+    setIsDowning(!isDowning);
+  };
 
   return (
-    <Slide appear={false} direction="down" in={!trigger}>
-      {children}
-    </Slide>
-  );
-}
-
-const HelloWorld = () => {
-  const sentido = false;
-  return (<div>
-    <HideOnScroll>
-      <Box
-        sx={{
-          zIndex: "modal",
-          position: "absolute",
-          pointerEvents: "none",
-          left: "-15rem",
-          top: "20%",
-        }}
+    <Grid container
+    height={'100%'}
+    >
+      <Grid item xs={4} md={2} xl={1}
       >
-        <img className="lala" src={backImg} />
-      </Box>
-    </HideOnScroll>
-    <Box sx={{ my: 2 }}>
-        <Typography>
-          {[...new Array(15)]
-            .map(
-              () => `Cras mattis consectetur purus sit amet fermentum.
-Cras justo odio, dapibus ac facilisis in, egestas eget quam.
-Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
-Praesent commodo cursus magna, vel scelerisque nisl consectetur et.`,
-            )
-            .join('\n')}
-            </Typography>
+        <Box
+          onMouseEnter={handleOnMove}
+          sx={{
+            zIndex: "0",
+            position: 'sticky',
+            marginLeft: '-13rem',
+            top: "20%",
+          }}
+        >
+          <img
+            style={{
+              width: "23rem",
+              pointerEvents: "none",
+            }}
+            className={`lala ${isDowning ? "rotateDown" : "rotateUp"}`}
+            src={backImg}
+          />
         </Box>
-    </div>
+      </Grid>
+      <Grid item xs={8} md={9} xl={11}
+      style={{
+        minHeight: "90vh",
+      }}>
+            {children}
+        </Grid>
+      </Grid>
   );
-}
+};
 export default HelloWorld;

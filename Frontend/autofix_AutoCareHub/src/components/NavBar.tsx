@@ -17,7 +17,7 @@ const NavBar = () => {
 
   return (
     <AppBar
-      position="static"
+      position="sticky"
       sx={{
         boxShadow: "0px 4px 20px rgba(255, 215, 0, 0.5)",
         bgcolor: "black.main",
@@ -35,7 +35,7 @@ const NavBar = () => {
           >
             <Box sx={{ display: "flex", alignItems: "center" }}>
               {pages.map((page) => (
-                <Link to={`/` + page}>
+                <Link key={page} to={`/` + page}>
                   <Button color="white" key={page} sx={{ marginX: 1 }}>
                     <Typography
                       sx={{

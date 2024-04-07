@@ -3,7 +3,11 @@
   background: linear-gradient(165deg, rgba(0,163,255,0.2) 10%, rgba(255,212,199,0.25) 70%);
   background-repeat: no-repeat;
   background-attachment: fixed;
+}
 
+body, html {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .judson-regular {

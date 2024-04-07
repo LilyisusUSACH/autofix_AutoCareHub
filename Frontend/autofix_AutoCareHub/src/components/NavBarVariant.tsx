@@ -21,12 +21,11 @@ const NavBarVariant = () => {
         bgcolor: "yellow.main",
       }}
     >
-      <Toolbar disableGutters>
+      <Toolbar style={{
+        justifyContent:'center'
+      }} disableGutters>
         <Box
           paddingTop={1}
-          sx={{
-            width: "100%",
-          }}
         >
           <Link to={"/"}
           style={{
