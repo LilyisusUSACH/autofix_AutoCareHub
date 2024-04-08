@@ -1,11 +1,11 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import HelloWorld from "../components/HelloWorld";
-import HelloWorld2 from "../components/HelloWorld2";
-import HelloWorld3 from "../components/HelloWorld3";
+import Home from "../components/Home";
 import { Fab, ThemeProvider, createTheme } from "@mui/material";
 import NavBar from "../components/NavBar";
-import { blue, green } from "@mui/material/colors";
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import { green } from "@mui/material/colors";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import ServiciosPage from "../components/ServiciosPage";
 
 const theme = createTheme({
   typography: {
@@ -19,6 +19,9 @@ const theme = createTheme({
     },
     yellow: {
       main: "#ffd700",
+    },
+    darkgrey: {
+      main: "#5a5a5a",
     },
     grey: {
       main: "#d9d9d9",
@@ -39,15 +42,20 @@ const ClientRouter = () => {
         <NavBar />
         <HelloWorld>
           <Routes>
-            <Route path="/" element={<HelloWorld2 />} />
-            <Route path="*" element={<HelloWorld3 />} />
+            <Route path="/" element={<Home />} />
+            <Route
+              path="*"
+              element={
+                <ServiciosPage/>
+              }
+            />
           </Routes>
           <Fab
-            size='large'
+            size="large"
             sx={{
-              position: "absolute",
-              bottom: 50,
-              right: 50,
+              position: 'fixed',
+    bottom: theme.spacing(4),
+    right: theme.spacing(4),
               color: "common.white",
               bgcolor: green[500],
               "&:hover": {
@@ -57,10 +65,12 @@ const ClientRouter = () => {
             color="primary"
             aria-label="add"
           >
-            <WhatsAppIcon style={{
-              width:'70%',
-              height:'70%'
-            }} />
+            <WhatsAppIcon
+              style={{
+                width: "70%",
+                height: "70%",
+              }}
+            />
           </Fab>
         </HelloWorld>
       </div>

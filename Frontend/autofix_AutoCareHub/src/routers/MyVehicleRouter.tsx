@@ -1,9 +1,7 @@
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom'
-import HelloWorld from '../components/HelloWorld';
-import HelloWorldOnlyClient from '../components/NavBar';
 import { ThemeProvider, createTheme } from '@mui/material';
-import NavBar from '../components/NavBar';
 import NavBarVariant from '../components/NavBarVariant';
+import MyVehiclePage from '../components/MyVehiclePage';
 
 const theme = createTheme({
     typography:{
@@ -36,7 +34,7 @@ const MyVehicleRouter = () => {
         <div className=''>
             <NavBarVariant/>
             <Routes>
-                <Route path='*' element={<HelloWorld/>}/>
+                <Route path='*' element={<MyVehiclePage/>}/>
             </Routes>
         </div>
         </ThemeProvider>
