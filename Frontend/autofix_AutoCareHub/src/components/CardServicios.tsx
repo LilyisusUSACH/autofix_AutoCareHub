@@ -11,7 +11,6 @@ import {
   } from "@mui/material";
   import CardContent from "@mui/material/CardContent";
   import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-  import "./b.css";
   import * as React from "react";
   
   interface ExpandMoreProps extends IconProps {

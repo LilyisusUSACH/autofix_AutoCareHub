@@ -6,6 +6,7 @@ import NavBar from "../components/NavBar";
 import { green } from "@mui/material/colors";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import ServiciosPage from "../components/ServiciosPage";
+import ContactosPage from "../components/ContactosPage";
 
 const theme = createTheme({
   typography: {
@@ -43,19 +44,15 @@ const ClientRouter = () => {
         <HelloWorld>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route
-              path="*"
-              element={
-                <ServiciosPage/>
-              }
-            />
+            <Route path="/servicios" element={<ServiciosPage />} />
+            <Route path="/contactos" element={<ContactosPage />} />
           </Routes>
           <Fab
             size="large"
             sx={{
-              position: 'fixed',
-    bottom: theme.spacing(4),
-    right: theme.spacing(4),
+              position: "fixed",
+              bottom: theme.spacing(4),
+              right: theme.spacing(4),
               color: "common.white",
               bgcolor: green[500],
               "&:hover": {
