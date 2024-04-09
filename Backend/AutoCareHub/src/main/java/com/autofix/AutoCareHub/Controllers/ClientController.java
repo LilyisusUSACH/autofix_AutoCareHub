@@ -5,4 +5,5 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/client")
 @CrossOrigin("*")
 public class ClientController {
+
 }

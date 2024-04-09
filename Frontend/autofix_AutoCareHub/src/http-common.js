@@ -7,7 +7,7 @@ console.log(autofixServer)
 console.log(autofixPort)
 
 export default axios.create({
-    baseUrl: `http://${autofixServer}:${autofixPort}`,
+    baseURL: `http://${autofixServer}:${autofixPort}`,
     headers: {
         'Content-Type': 'application/json'
     }

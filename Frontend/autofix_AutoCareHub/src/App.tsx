@@ -10,9 +10,9 @@ function App() {
     <Router>
           <div>
             <Routes>
-              <Route path="/*" element={<ClientRouter/>}/>
+              <Route path="/Workshop/*" element={<WorkshopRouter/>} />
               <Route path='/MyVehicle/*' element={<MyVehicleRouter/>}/>
-              <Route path="/workshop/*" element={<WorkshopRouter/>} />
+              <Route path="/*" element={<ClientRouter/>}/>
             </Routes>
           </div>
     </Router>

@@ -1,4 +1,4 @@
-const HelloWorldOnlyWork = () => {
+const WorkshopPage = () => {
     return (
         <div>
             <h1>
@@ -7,4 +7,4 @@ const HelloWorldOnlyWork = () => {
         </div>
     )
 };
-export default HelloWorldOnlyWork;
+export default WorkshopPage;
