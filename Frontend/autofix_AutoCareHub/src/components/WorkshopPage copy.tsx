@@ -21,7 +21,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import React, { useEffect, useState } from "react";
 import workshopService from "../services/workshop.service";
 import { repTypes } from "../constants";
-import { TableVirtuoso } from "react-virtuoso";
 
 const WorkshopPage = () => {
   const [reparations, setReparations] = useState([]);
@@ -40,24 +39,7 @@ const WorkshopPage = () => {
       })
       .catch((error) => console.log(error));
   };
-  const Row = ({ index, style }) => (
-    <div style={style}>
-      <TableRow key={index}>
-        <TableCell align="center" component="th" scope="row">
-          {reparations[index].id}
-        </TableCell>
-        <TableCell align="center">
-          {reparations[index].vehiculo.marca.toUpperCase()}
-        </TableCell>
-        <TableCell align="center">
-          {reparations[index].vehiculo.modelo.toUpperCase()}
-        </TableCell>
-        <TableCell align="center">
-          {repTypes[reparations[index].typeRep - 1]}
-        </TableCell>
-      </TableRow>
-    </div>
-  );
+
   const Row2 = ({ index }) => {
     const row = reparations[index];
     return (
@@ -83,7 +65,6 @@ const WorkshopPage = () => {
     const { row } = props;
 
     return (
-      <React.Fragment>
         <TableRow
           sx={{
             "& > *": { borderBottom: "unset" },
@@ -110,7 +91,6 @@ const WorkshopPage = () => {
           <TableCell align="center"> Marca</TableCell>
           <TableCell />
         </TableRow>
-      </React.Fragment>
     );
   };
 
@@ -201,16 +181,19 @@ const WorkshopPage = () => {
                   <TableCell />
                 </TableRow>
               </TableHead>
-              <TableBody>
-              <TableVirtuoso
-                    style={{position:'relative', height: '65vh'}}
-                    data={reparations}
-                    itemContent={(index, user) => {
-                        return (
-                            <Fila key={index} row={reparations[index]} ></Fila>
-                        )}}
-                        >
-              </TableVirtuoso>
+              <TableBody
+                sx={{
+                  ".MuiTableCell-root": {
+                    fontSize: "17px",
+                    fontWeight: "100",
+                  },
+                }}
+              >
+                {reparations.map( (reparation, index) => {
+                    return (
+                    <Fila row={reparation} key={index} />
+                )
+                } )}
               </TableBody>
             </Table>
           </TableContainer>

@@ -17,7 +17,8 @@ const theme = createTheme({
       },
       aqua:{
         main: "#28D3C9"
-      },yellow: {
+      },
+      yellow: {
         main: "#ffd700",
       },
     },

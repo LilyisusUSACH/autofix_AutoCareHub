@@ -13,6 +13,7 @@ import Carousel from "react-material-ui-carousel";
 import "../style/Example.scss";
 import Img from "../assets/imgs/ElectricidadAuto.jpg";
 import { Link } from "react-router-dom";
+import { repTypes } from "../constants";
 
 type Item = {
   Name: string;

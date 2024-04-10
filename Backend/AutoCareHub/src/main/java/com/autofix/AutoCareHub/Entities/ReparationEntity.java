@@ -61,4 +61,9 @@ public class ReparationEntity {
         return receipt.getId();
     }
 
+    @JsonGetter("vehiculo")
+    private VehicleEntity vehicle_patente(){
+        return receipt.getPatente();
+    }
+
 }

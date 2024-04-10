@@ -22,6 +22,11 @@ public class RepairController {
         return ResponseEntity.ok( repairService.getAllReparations() );
     }
 
+    @GetMapping("/actives")
+    public ResponseEntity<?> getAllActiveReparations(){
+        return ResponseEntity.ok(repairService.getAllActiveReparations());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> findReparationById(@PathVariable Long id){
         return ResponseEntity.ok( repairService.getReparationById(id) );

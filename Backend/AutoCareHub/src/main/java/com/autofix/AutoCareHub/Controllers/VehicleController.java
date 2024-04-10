@@ -65,7 +65,7 @@ public class VehicleController {
                     return ResponseEntity.ok(estadoVehiculo);
                 }
                 reparations.sort(Comparator.comparing(ReparationEntity::getFechaSalida).reversed());
-                if(reparations.get(0).getFechaSalida().isAfter(LocalDate.now()) ||   reparations.get(0).getFechaSalida().isAfter(LocalDate.now())){
+                if(reparations.get(0).getFechaSalida().isEqual(LocalDate.now()) ||   reparations.get(0).getFechaSalida().isAfter(LocalDate.now())){
                     estadoVehiculo.put("estado", "El vehiculo se encuentra listo para ser retirado"); // hacer con unretired
                     return ResponseEntity.ok(estadoVehiculo);
                 }else{

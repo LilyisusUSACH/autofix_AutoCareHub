@@ -30,6 +30,11 @@ public class RepairService {
         return (ArrayList<ReparationEntity>) reparationRepository.findAll();
     }
 
+        // Find all Actives
+    public ArrayList<ReparationEntity> getAllActiveReparations(){
+        return reparationRepository.findAllByFechaSalidaIsNull();
+    }
+
         // Find By Id
     public Optional<ReparationEntity> getReparationById(Long id){
         return reparationRepository.findById(id);

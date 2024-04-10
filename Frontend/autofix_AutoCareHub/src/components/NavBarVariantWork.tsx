@@ -64,7 +64,7 @@ const NavBarVariantWork = () => {
 
   const drawer = (
     <Box
-      sx={{ width: 250 }}
+      sx={{ width: 220 }}
       role="presentation"
       onClick={toggleDrawer(false)}
       textAlign={"center"}
@@ -103,13 +103,24 @@ const NavBarVariantWork = () => {
           }}
         />
       </Box>
-      <List>
+      <List sx={{
+        '& .MuiSvgIcon-root': {
+          fontSize: 45,
+          color:'black.main',
+        },
+      }}>
         {options.map((option, index) => (
-          <Box>
+          <Box key={index}>
             <ListItem key={index} disablePadding>
               <ListItemButton>
                 <ListItemIcon>{option.icon}</ListItemIcon>
-                <ListItemText primary={option.text} />
+                <ListItemText 
+                primaryTypographyProps={{
+                  fontSize: 20,
+                  fontWeight:10,
+                  lineHeight: '1'
+                }}
+                  primary={option.text} />
               </ListItemButton>
             </ListItem>
             <Divider
@@ -149,7 +160,10 @@ const NavBarVariantWork = () => {
           sx={{ mr: 2, position: "absolute", left: "10%" }}
           onClick={toggleDrawer(true)}
         >
-          <MenuIcon />
+          <MenuIcon sx={{
+            fontSize: 35,
+            color:'black.main',
+          }}/>
         </IconButton>
         <Drawer open={open} onClose={toggleDrawer(false)}>
           {drawer}
