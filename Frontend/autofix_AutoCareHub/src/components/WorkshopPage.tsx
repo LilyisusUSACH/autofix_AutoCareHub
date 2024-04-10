@@ -1,4 +1,3 @@
-import { Height } from "@mui/icons-material";
 import {
   Box,
   Divider,
@@ -15,21 +14,116 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { FixedSizeList, VariableSizeList } from "react-window";
 
 import SearchIcon from "@mui/icons-material/Search";
 import React, { useEffect, useState } from "react";
 import workshopService from "../services/workshop.service";
 import { repTypes } from "../constants";
-import { TableVirtuoso } from "react-virtuoso";
+import { TableComponents, TableVirtuoso } from "react-virtuoso";
+
+interface Vehicle {
+  carType: string,
+  fabricationYear: string,
+  id:number,
+  kmRecorridos:number,
+  marca:string,
+  modelo:string,
+  motorType:string,
+  nasientos:number,
+  patente:string
+}
+
+interface Reparation{
+  fechaIngreso:string,
+  fechaRetiro:string,
+  fechaSalida:string,
+  horaIngreso:string,
+  horaRetiro:string,
+  horaSalida:string,
+  id:number,
+  montoTotal:number,
+  receipt_id:number,
+  typeRep:number,
+  vehiculo: Vehicle,
+}
+
+interface ColumnData {
+  dataKey: keyof Reparation;
+  label: string;
+  width: number;
+}
+
+const VirtuosoTableComponents: TableComponents<Reparation> = {
+  Scroller: React.forwardRef<HTMLDivElement>((props, ref) => (
+    <TableContainer component={Box} {...props} ref={ref} />
+  )),
+  Table: (props) => (
+    <Table {...props} sx={{ borderCollapse: 'separate', tableLayout: 'auto' }} />
+  ),
+  TableHead,
+  TableRow: ({ item: _item, ...props }) => <TableRow {...props} />,
+  TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
+    <TableBody {...props} ref={ref} />
+  )),
+};
+
+const columns: ColumnData[] = [
+  {
+    width: 200,
+    label: "Dessert",
+    dataKey: "dessert",
+  },
+  {
+    width: 120,
+    label: "Calories\u00A0(g)",
+    dataKey: "calories",
+    numeric: true,
+  },
+  {
+    width: 120,
+    label: "Fat\u00A0(g)",
+    dataKey: "fat",
+    numeric: true,
+  },
+  {
+    width: 120,
+    label: "Carbs\u00A0(g)",
+    dataKey: "carbs",
+    numeric: true,
+  },
+  {
+    width: 120,
+    label: "Protein\u00A0(g)",
+    dataKey: "protein",
+    numeric: true,
+  },
+];
+
+const Fila = (props: { row: Reparation }) => {
+  const { row } = props;
+  return (
+    <>
+      <TableCell align="center" component="th" scope="row">
+        {row.vehiculo.patente.toUpperCase()}
+      </TableCell>
+      <TableCell align="center">
+        {row.vehiculo.marca.toUpperCase()}
+      </TableCell>
+      <TableCell align="center">
+        {row.vehiculo.modelo.toUpperCase()}
+      </TableCell>
+      <TableCell align="center"> {repTypes[row.typeRep - 1]}</TableCell>
+      <TableCell align="center">
+        {row.fechaIngreso + " " + row.horaIngreso.slice(0, 5)}
+      </TableCell>
+      <TableCell align="center"> aaa</TableCell>
+      <TableCell align="center"> Marca</TableCell>
+    </>
+  );
+};
 
 const WorkshopPage = () => {
   const [reparations, setReparations] = useState([]);
-
-  //type reparation = {
-  //     fechaIngreso : string,
-  //      horaIngreso : string,
-  //    };
 
   const init = () => {
     workshopService
@@ -40,79 +134,7 @@ const WorkshopPage = () => {
       })
       .catch((error) => console.log(error));
   };
-  const Row = ({ index, style }) => (
-    <div style={style}>
-      <TableRow key={index}>
-        <TableCell align="center" component="th" scope="row">
-          {reparations[index].id}
-        </TableCell>
-        <TableCell align="center">
-          {reparations[index].vehiculo.marca.toUpperCase()}
-        </TableCell>
-        <TableCell align="center">
-          {reparations[index].vehiculo.modelo.toUpperCase()}
-        </TableCell>
-        <TableCell align="center">
-          {repTypes[reparations[index].typeRep - 1]}
-        </TableCell>
-      </TableRow>
-    </div>
-  );
-  const Row2 = ({ index }) => {
-    const row = reparations[index];
-    return (
-      <TableRow key={index}>
-        <TableCell align="center" component="th" scope="row">
-          {row.vehiculo.patente.toUpperCase()}
-        </TableCell>
-        <TableCell align="center">{row.vehiculo.marca.toUpperCase()}</TableCell>
-        <TableCell align="center">
-          {row.vehiculo.modelo.toUpperCase()}
-        </TableCell>
-        <TableCell align="center">{repTypes[row.typeRep - 1]}</TableCell>
-        <TableCell align="center">
-          {row.fechaIngreso + " " + row.horaIngreso.slice(0, 5)}
-        </TableCell>
-        <TableCell align="center">aaa</TableCell>
-        <TableCell align="center">Marca</TableCell>
-        <TableCell />
-      </TableRow>
-    );
-  };
-  const Fila = (props: { row: object }) => {
-    const { row } = props;
 
-    return (
-      <React.Fragment>
-        <TableRow
-          sx={{
-            "& > *": { borderBottom: "unset" },
-            background: row.id % 2 != 0 ? "#E7E7E7" : "#FFFFFF",
-          }}
-        >
-          <TableCell align="center" component="th" scope="row">
-            {row.vehiculo.patente.toUpperCase()}
-          </TableCell>
-          <TableCell align="center">
-            {" "}
-            {row.vehiculo.marca.toUpperCase()}
-          </TableCell>
-          <TableCell align="center">
-            {" "}
-            {row.vehiculo.modelo.toUpperCase()}
-          </TableCell>
-          <TableCell align="center"> {repTypes[row.typeRep - 1]}</TableCell>
-          <TableCell align="center">
-            {" "}
-            {row.fechaIngreso + " " + row.horaIngreso.slice(0, 5)}
-          </TableCell>
-          <TableCell align="center"> aaa</TableCell>
-          <TableCell align="center"> Marca</TableCell>
-          <TableCell />
-        </TableRow>
-      </React.Fragment>
-    );
-  };
 
   useEffect(() => {
     init();
@@ -179,42 +201,31 @@ const WorkshopPage = () => {
           </Grid>
         </Grid>
 
-        <Grid container alignContent={"center"} justifyContent={"center"}>
-          <TableContainer>
-            <Table>
-              <TableHead
-                sx={{
-                  ".MuiTableCell-root": {
-                    fontSize: "20px",
-                    fontWeight: "700",
-                  },
-                }}
+        <Box alignContent={"center"} height={'89%'} justifyContent={"center"}>
+          <TableVirtuoso
+            style={{ height: "100%", borderRadius: '0 0 25px 25px' }}
+            data={reparations}
+            components={VirtuosoTableComponents}
+            fixedHeaderContent={() => (
+              <TableRow
+              style={{
+                background:'white'
+              }}
               >
-                <TableRow>
-                  <TableCell align="center"> Patente </TableCell>
-                  <TableCell align="center"> Marca </TableCell>
-                  <TableCell align="center"> Modelo </TableCell>
-                  <TableCell align="center"> Tipo de reparación </TableCell>
-                  <TableCell align="center"> Fecha inicio </TableCell>
-                  <TableCell align="center"> Completar </TableCell>
-                  <TableCell align="center"> Cancelar </TableCell>
-                  <TableCell />
-                </TableRow>
-              </TableHead>
-              <TableBody>
-              <TableVirtuoso
-                    style={{position:'relative', height: '65vh'}}
-                    data={reparations}
-                    itemContent={(index, user) => {
-                        return (
-                            <Fila key={index} row={reparations[index]} ></Fila>
-                        )}}
-                        >
-              </TableVirtuoso>
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Grid>
+                <TableCell variant="head" align="center"> Patente </TableCell>
+                <TableCell variant="head" align="center"> Marca </TableCell>
+                <TableCell variant="head" align="center"> Modelo </TableCell>
+                <TableCell variant="head" align="center"> Tipo de reparación </TableCell>
+                <TableCell variant="head" align="center"> Fecha inicio </TableCell>
+                <TableCell variant="head" align="center"> Completar </TableCell>
+                <TableCell variant="head" align="center"> Cancelar </TableCell>
+              </TableRow>
+            )}
+            itemContent={(index, reparation) => {
+              return <Fila key={index} row={reparation}></Fila>;
+            }}
+          ></TableVirtuoso>
+        </Box>
       </Paper>
     </Grid>
   );
