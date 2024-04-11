@@ -1,10 +1,17 @@
 import {
+  Alert,
   Box,
+  Button,
+  Collapse,
+  Dialog,
   Divider,
+  Fab,
   Grid,
   InputAdornment,
-  InputBase,
+  MenuItem,
   Paper,
+  Snackbar,
+  SnackbarCloseReason,
   Table,
   TableBody,
   TableCell,
@@ -14,41 +21,43 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-
+import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState } from "react";
 import workshopService from "../services/workshop.service";
 import { repTypes } from "../constants";
 import { TableComponents, TableVirtuoso } from "react-virtuoso";
+import { Link, useNavigate } from "react-router-dom";
+
+// TODO: Separar Por componentes lo que se pueda
 
 interface Vehicle {
-  carType: string,
-  fabricationYear: string,
-  id:number,
-  kmRecorridos:number,
-  marca:string,
-  modelo:string,
-  motorType:string,
-  nasientos:number,
-  patente:string
+  carType: string;
+  fabricationYear: string;
+  id: number;
+  kmRecorridos: number;
+  marca: string;
+  modelo: string;
+  motorType: string;
+  nasientos: number;
+  patente: string;
 }
 
-interface Reparation{
-  fechaIngreso:string,
-  fechaRetiro:string,
-  fechaSalida:string,
-  horaIngreso:string,
-  horaRetiro:string,
-  horaSalida:string,
-  id:number,
-  montoTotal:number,
-  receipt_id:number,
-  typeRep:number,
-  vehiculo: Vehicle,
+interface Reparation {
+  fechaIngreso: string;
+  fechaRetiro: string;
+  fechaSalida: string;
+  horaIngreso: string;
+  horaRetiro: string;
+  horaSalida: string;
+  id: number;
+  montoTotal: number;
+  receipt_id: number;
+  typeRep: number;
+  vehiculo: Vehicle;
 }
 
 interface ColumnData {
-  dataKey: keyof Reparation;
   label: string;
   width: number;
 }
@@ -58,7 +67,10 @@ const VirtuosoTableComponents: TableComponents<Reparation> = {
     <TableContainer component={Box} {...props} ref={ref} />
   )),
   Table: (props) => (
-    <Table {...props} sx={{ borderCollapse: 'separate', tableLayout: 'auto' }} />
+    <Table
+      {...props}
+      sx={{ borderCollapse: "separate", tableLayout: "fixed" }}
+    />
   ),
   TableHead,
   TableRow: ({ item: _item, ...props }) => <TableRow {...props} />,
@@ -69,165 +81,458 @@ const VirtuosoTableComponents: TableComponents<Reparation> = {
 
 const columns: ColumnData[] = [
   {
-    width: 200,
-    label: "Dessert",
-    dataKey: "dessert",
+    width: 40,
+    label: "Patente",
   },
   {
-    width: 120,
-    label: "Calories\u00A0(g)",
-    dataKey: "calories",
-    numeric: true,
+    width: 80,
+    label: "Marca",
   },
   {
-    width: 120,
-    label: "Fat\u00A0(g)",
-    dataKey: "fat",
-    numeric: true,
+    width: 50,
+    label: "Modelo",
   },
   {
-    width: 120,
-    label: "Carbs\u00A0(g)",
-    dataKey: "carbs",
-    numeric: true,
+    width: 150,
+    label: "Tipo de reparacion",
   },
   {
-    width: 120,
-    label: "Protein\u00A0(g)",
-    dataKey: "protein",
-    numeric: true,
+    width: 80,
+    label: "Fecha inicio",
+  },
+  {
+    width: 40,
+    label: "Completar",
+  },
+  {
+    width: 40,
+    label: "Cancelar",
   },
 ];
 
-const Fila = (props: { row: Reparation }) => {
-  const { row } = props;
+const Fila = (props: { style: object; index: number; row: Reparation }) => {
+  const { style, index, row } = props;
   return (
     <>
-      <TableCell align="center" component="th" scope="row">
+      <TableCell sx={style} align="center" component="th" scope="row">
         {row.vehiculo.patente.toUpperCase()}
       </TableCell>
-      <TableCell align="center">
+      <TableCell
+        sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
+        align="center"
+      >
         {row.vehiculo.marca.toUpperCase()}
       </TableCell>
-      <TableCell align="center">
+      <TableCell
+        sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
+        align="center"
+      >
         {row.vehiculo.modelo.toUpperCase()}
       </TableCell>
-      <TableCell align="center"> {repTypes[row.typeRep - 1]}</TableCell>
-      <TableCell align="center">
+      <TableCell
+        sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
+        align="center"
+      >
+        {repTypes[row.typeRep]}
+      </TableCell>
+      <TableCell
+        sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
+        align="center"
+      >
         {row.fechaIngreso + " " + row.horaIngreso.slice(0, 5)}
       </TableCell>
-      <TableCell align="center"> aaa</TableCell>
-      <TableCell align="center"> Marca</TableCell>
+      <TableCell
+        sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
+        align="center"
+      >
+        {" "}
+        aaa // TODO: poner botones y crear los update / delete
+      </TableCell>
+      <TableCell
+        sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
+        align="center"
+      >
+        {" "}
+        Marca
+      </TableCell>
     </>
   );
 };
 
 const WorkshopPage = () => {
-  const [reparations, setReparations] = useState([]);
+  const [filtered, setfiltered] = useState<Reparation[]>([]);
+  const [reparations, setReparations] = useState<Reparation[]>([]);
+  const [open, setOpen] = React.useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
+  const [formData, setFormData] = useState({
+    patente: "",
+    typeRep: 0,
+  });
+  const handleSubmit = () => {
+    workshopService
+      .postNewReparation({
+        patente: formData.patente.toLowerCase(),
+        typeRep: formData.typeRep,
+      })
+      .then((response) => {
+        //console.log(response);
+        setError(false);
+        setSuccess(true);
+        handleClose();
+        init();
+        handleSearch("");
+      })
+      .catch(() => setError(true));
+  };
+  const handleChange = (event) => {
+    setFormData({
+      ...formData,
+      [event.target.name]:
+        event.target.name == "patente"
+          ? event.target.value.toUpperCase()
+          : event.target.value,
+    });
+  };
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setError(false);
+    setOpen(false);
+  };
+
+  const navigate = useNavigate();
 
   const init = () => {
     workshopService
       .getActiveReparations()
       .then((response) => {
         setReparations(response.data);
-        console.log(response.data);
+        setfiltered(response.data);
+        //console.log(response.data);
       })
       .catch((error) => console.log(error));
   };
 
+  const handleSearch = (valorBuscado: string) => {
+    const filasFiltradas = reparations.filter((fila) => {
+      return (
+        fila.vehiculo.patente
+          .toLowerCase()
+          .includes(valorBuscado.toLowerCase()) ||
+        fila.vehiculo.marca
+          .toLowerCase()
+          .includes(valorBuscado.toLowerCase()) ||
+        fila.vehiculo.modelo
+          .toLowerCase()
+          .includes(valorBuscado.toLowerCase()) ||
+        repTypes[fila.typeRep]
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .includes(
+            valorBuscado
+              .toLowerCase()
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "")
+          )
+      );
+    });
+    setfiltered(filasFiltradas);
+  };
 
   useEffect(() => {
     init();
   }, []);
 
   return (
-    <Grid
-      container
-      alignContent={"center"}
-      justifyContent={"center"}
-      width={"100%"}
-      height={"90vh"}
-    >
-      <Paper
-        elevation={10}
-        square={false}
-        sx={{
-          width: "95%",
-          height: "95%",
-          borderRadius: "25px",
+    <>
+      <Grid
+        container
+        alignContent={"center"}
+        justifyContent={"center"}
+        width={"100%"}
+        height={"90vh"}
+      >
+        <Paper
+          elevation={10}
+          square={false}
+          sx={{
+            width: "95%",
+            height: "90%",
+            borderRadius: "25px",
+          }}
+        >
+          <Grid
+            container
+            alignItems={"center"}
+            justifyContent={"space-between"}
+            width={"95%"}
+            margin={"auto"}
+            mt={"2%"}
+            rowGap={"10px"}
+          >
+            <Grid item xs={12} sm={5} md={4}>
+              <Typography fontWeight={800} variant="h5">
+                Reparaciones activas
+                <Divider
+                  variant="fullWidth"
+                  sx={{
+                    opacity: 1,
+                    background: "black",
+                  }}
+                ></Divider>
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                id="filled-search"
+                label="Buscar reparación"
+                type="search"
+                size="small"
+                variant="outlined"
+                onChange={(value) => handleSearch(value.target.value)}
+                sx={{
+                  width: "100%",
+                  background: "rgb(240,240,240)",
+                  borderRadius: "5px",
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              ></TextField>
+            </Grid>
+          </Grid>
+
+          <Box
+            alignContent={"center"}
+            height={"88.5%"}
+            justifyContent={"center"}
+          >
+            <TableVirtuoso
+              style={{ height: "100%", borderRadius: "0 0 25px 25px" }}
+              data={filtered}
+              components={VirtuosoTableComponents}
+              fixedHeaderContent={() => (
+                <TableRow
+                  style={{
+                    background: "white",
+                  }}
+                >
+                  {columns.map((columna, index) => {
+                    return (
+                      <TableCell
+                        sx={{
+                          width: columna.width,
+                        }}
+                        key={index}
+                        variant="head"
+                        align="center"
+                      >
+                        {columna.label}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              )}
+              itemContent={(index, reparation) => {
+                return (
+                  <Fila
+                    style={{
+                      background: index % 2 == 0 ? "lightgrey" : "white",
+                    }}
+                    index={index}
+                    key={index}
+                    row={reparation}
+                  ></Fila>
+                );
+              }}
+            ></TableVirtuoso>
+          </Box>
+          <Snackbar
+            open={success}
+            autoHideDuration={3600}
+            onClose={(event: Event, reason?: SnackbarCloseReason) => {
+              if (reason === 'clickaway') {
+                return;
+              }
+              setSuccess(false);
+            }}
+          >
+            <Alert
+              onClose={() => {
+                setSuccess(false);
+              }}
+              variant="filled"
+              severity="success"
+            >
+              La reparación fue creada con exito
+            </Alert>
+          </Snackbar>
+        </Paper>
+      </Grid>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: { width: "40%", height: "70%", borderRadius: "25px" },
         }}
       >
         <Grid
           container
+          direction={"column"}
+          justifyContent={"space-evenly"}
           alignItems={"center"}
-          justifyContent={"space-between"}
-          width={"95%"}
-          margin={"auto"}
-          mt={"2%"}
-          rowGap={"10px"}
+          height={"100%"}
         >
-          <Grid item xs={12} sm={5} md={4}>
-            <Typography fontWeight={800} variant="h5">
-              Reparaciones activas
-              <Divider
-                variant="fullWidth"
-                sx={{
-                  opacity: 1,
-                  background: "black",
-                }}
-              ></Divider>
+          <Grid item>
+            <Typography fontWeight={800} variant="h4">
+              {"Nueva Reparación"}
             </Typography>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <TextField
-              id="filled-search"
-              label="Buscar reparación"
-              type="search"
-              size="small"
-              variant="outlined"
+            <Divider
+              variant="fullWidth"
               sx={{
-                width: "100%",
-                background: "rgb(240,240,240)",
-                borderRadius: "5px",
+                mt: "2%",
+                borderBottomWidth: "1px",
+                opacity: 1,
+                background: "black",
+              }}
+            ></Divider>
+          </Grid>
+          <Grid item textAlign={"center"} width={"70%"}>
+            <Typography variant="h6" fontStyle={"italic"}>
+              Primero debe registrar el ingreso del vehiculo Si aun no lo hace
+              clickee el boton
+            </Typography>
+            <Link
+              to={"/"}
+              style={{ textDecoration: "none", maxWidth: "fit-content" }}
+            >
+              <Button
+                variant="contained"
+                sx={{
+                  margin: "3px 10px 3px 10px",
+                  paddingInline: "5%",
+                  backgroundColor: "aqua.main",
+                  color: "black.main",
+                  borderRadius: "10px",
+                  "&:hover": {
+                    backgroundColor: "aqua.main",
+                    filter: "brightness(95%)",
+                  },
+                }}
+              >
+                Ingresar vehículo
+              </Button>
+            </Link>
+          </Grid>
+          <Grid item width={"70%"}>
+            <TextField
+              // TODO: validar
+              required
+              fullWidth
+              sx={{
+                letterSpacing: "200px",
+                mb: 4,
               }}
               InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
+                style: { letterSpacing: "20px" },
               }}
-            ></TextField>
+              name="patente"
+              value={formData.patente}
+              onChange={handleChange}
+              label="Patente"
+              variant="filled"
+              size="small"
+            />
+            <TextField
+              id="filled-select-currency"
+              select
+              required
+              label="Selecciona"
+              defaultValue={0}
+              name="typeRep"
+              value={formData.typeRep}
+              onChange={handleChange}
+              helperText="Seleccione el tipo de reparacion que se le hara al vehiculo ingresado"
+              variant="filled"
+              size="small"
+              fullWidth
+            >
+              {repTypes.map((option, index) => (
+                <MenuItem key={index} value={index}>
+                  {option}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+          <Grid item>
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              sx={{
+                backgroundColor: "pink.main",
+                borderRadius: "10px",
+                "&:hover": {
+                  backgroundColor: "pink.main",
+                  filter: "brightness(95%)",
+                },
+              }}
+            >
+              Registrar Reparación
+            </Button>
           </Grid>
         </Grid>
-
-        <Box alignContent={"center"} height={'89%'} justifyContent={"center"}>
-          <TableVirtuoso
-            style={{ height: "100%", borderRadius: '0 0 25px 25px' }}
-            data={reparations}
-            components={VirtuosoTableComponents}
-            fixedHeaderContent={() => (
-              <TableRow
-              style={{
-                background:'white'
-              }}
-              >
-                <TableCell variant="head" align="center"> Patente </TableCell>
-                <TableCell variant="head" align="center"> Marca </TableCell>
-                <TableCell variant="head" align="center"> Modelo </TableCell>
-                <TableCell variant="head" align="center"> Tipo de reparación </TableCell>
-                <TableCell variant="head" align="center"> Fecha inicio </TableCell>
-                <TableCell variant="head" align="center"> Completar </TableCell>
-                <TableCell variant="head" align="center"> Cancelar </TableCell>
-              </TableRow>
-            )}
-            itemContent={(index, reparation) => {
-              return <Fila key={index} row={reparation}></Fila>;
+        <Collapse in={error}>
+          <Alert
+            sx={{
+              zIndex: 10,
+              position: "fixed",
+              width: "37%",
+              bottom: "4%",
             }}
-          ></TableVirtuoso>
-        </Box>
-      </Paper>
-    </Grid>
+            severity="error"
+            onClose={() => {
+              setError(false);
+            }}
+          >
+            No se pudo crear la reparación
+          </Alert>
+        </Collapse>
+      </Dialog>
+
+      <Fab
+        size="large"
+        onClick={handleClickOpen}
+        sx={{
+          position: "fixed",
+          bottom: "4%",
+          right: "2%",
+          color: "common.white",
+          border: "0.5px solid black",
+          bgcolor: "aqua.main",
+          "&:hover": {
+            bgcolor: "#30A3C9",
+          },
+        }}
+        aria-label="add"
+      >
+        <AddIcon
+          style={{
+            width: "90%",
+            height: "90%",
+          }}
+        />
+      </Fab>
+    </>
   );
 };
 export default WorkshopPage;

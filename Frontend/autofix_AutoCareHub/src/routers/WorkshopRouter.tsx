@@ -21,6 +21,9 @@ const theme = createTheme({
       yellow: {
         main: "#ffd700",
       },
+      pink:{
+        main: "#FF4090"
+      }
     },
   });
   

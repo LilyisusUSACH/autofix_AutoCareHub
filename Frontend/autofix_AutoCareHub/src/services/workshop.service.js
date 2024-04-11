@@ -8,4 +8,8 @@ const getActiveReparations = () => {
     return httpClient.get('/api/repair/actives');
 }
 
-export default {getReparations, getActiveReparations};
+const postNewReparation = (data) => {
+    return httpClient.post('api/repair/',data)
+}
+
+export default {getReparations, getActiveReparations, postNewReparation};

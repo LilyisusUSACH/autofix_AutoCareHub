@@ -32,7 +32,7 @@ public class RepairService {
 
         // Find all Actives
     public ArrayList<ReparationEntity> getAllActiveReparations(){
-        return reparationRepository.findAllByFechaSalidaIsNull();
+        return reparationRepository.findAllByFechaSalidaIsNullOrderByFechaIngresoDescHoraIngresoDesc();
     }
 
         // Find By Id

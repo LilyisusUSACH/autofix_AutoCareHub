@@ -17,6 +17,9 @@ public interface ReparationRepository extends JpaRepository<ReparationEntity, Lo
 
     ArrayList<ReparationEntity> findAllByFechaSalidaIsNull();
 
+    ArrayList<ReparationEntity> findAllByFechaSalidaIsNullOrderByFechaIngresoDescHoraIngresoDesc();
+
+
     Optional<ReparationEntity> findFirstByReceiptOrderByFechaIngresoDesc(ReceiptEntity receipt);
 
     List<ReparationEntity> findAllByReceipt_PatentePatente(String patente);
