@@ -48,4 +48,10 @@ public class RepairController {
         return ResponseEntity.ok( repairService.reparationComplete(id) );
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteReparation(@PathVariable Long id){
+        repairService.deleteReparation(id);
+        return ResponseEntity.ok("Deleted");
+    }
+
 }

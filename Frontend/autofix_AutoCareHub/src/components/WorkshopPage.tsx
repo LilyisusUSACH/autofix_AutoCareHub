@@ -7,6 +7,7 @@ import {
   Divider,
   Fab,
   Grid,
+  IconButton,
   InputAdornment,
   MenuItem,
   Paper,
@@ -23,11 +24,14 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import React, {useEffect, useState } from "react";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import React, { useEffect, useState } from "react";
 import workshopService from "../services/workshop.service";
 import { repTypes } from "../constants";
 import { TableComponents, TableVirtuoso } from "react-virtuoso";
 import { Link, useNavigate } from "react-router-dom";
+import { closeSnackbar, enqueueSnackbar, VariantType } from "notistack";
 
 // TODO: Separar Por componentes lo que se pueda
 
@@ -109,9 +113,11 @@ const columns: ColumnData[] = [
     label: "Cancelar",
   },
 ];
-
-const Fila = (props: { style: object; index: number; row: Reparation }) => {
-  const { style, index, row } = props;
+// TODO: poner botones y crear los update / delete
+// TODO: arreglar fuentes
+const Fila = (props: { style: object; index: number; row: Reparation, onComplete:any, onCancel:any }) => {
+  const { style, index, row, onComplete, onCancel } = props;
+  
   return (
     <>
       <TableCell sx={style} align="center" component="th" scope="row">
@@ -145,43 +151,93 @@ const Fila = (props: { style: object; index: number; row: Reparation }) => {
         sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
         align="center"
       >
-        {" "}
-        aaa // TODO: poner botones y crear los update / delete
+        <IconButton
+          size="medium"
+          aria-label="complete"
+          onClick={onComplete}
+          sx={{
+            marginBlock: "-10px",
+            border:'0.5px solid black',
+            backgroundColor:'#5CD000',
+            color: "white",
+            "&:hover":{
+              backgroundColor:'#5CD000',
+              filter:'brightness(120%)'
+            }
+          }}
+        >
+          <CheckIcon fontSize="large" />
+        </IconButton>
       </TableCell>
       <TableCell
         sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
         align="center"
       >
-        {" "}
-        Marca
+        <IconButton sx={{
+            marginBlock: "-10px",
+            border:'0.5px solid black',
+            backgroundColor:'#E91E63',
+            color: "white",
+            "&:hover":{
+              backgroundColor:'#E91E63',
+              filter:'brightness(80%)'
+            }
+          }} 
+          onClick={onCancel}
+          aria-label="cancel" size="medium">
+          <CloseIcon fontSize="large" />
+        </IconButton>
       </TableCell>
     </>
   );
 };
 
+
+
 const WorkshopPage = () => {
   const [filtered, setfiltered] = useState<Reparation[]>([]);
   const [reparations, setReparations] = useState<Reparation[]>([]);
   const [open, setOpen] = React.useState(false);
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
+
   const [formData, setFormData] = useState({
     patente: "",
     typeRep: 0,
   });
+
+  const onCancelRep = (id) => {
+    enqueueSnackbar('Se cancelo la reparacion', 
+      { variant:'error'});
+
+    workshopService.deleteReparation(id).then((response) =>{
+      console.log(response);
+      init();
+    }
+    );
+  }
+
+  const onCompleteRep = (id) => {
+    workshopService.completeReparation(id).then((response) =>{
+      console.log(response);
+      enqueueSnackbar("Se completo la reparación", {variant:'info'})
+      init();
+    }
+    );
+  }
+
   const handleSubmit = () => {
     workshopService
       .postNewReparation({
         patente: formData.patente.toLowerCase(),
-        typeRep: formData.typeRep,
+        typeRep: (formData.typeRep+1),
       })
       .then((response) => {
         //console.log(response);
         setError(false);
-        setSuccess(true);
         handleClose();
         init();
         handleSearch("");
+        enqueueSnackbar('La reparación fue creada con éxito', { variant:'success' })
       })
       .catch(() => setError(true));
   };
@@ -347,6 +403,8 @@ const WorkshopPage = () => {
                     style={{
                       background: index % 2 == 0 ? "lightgrey" : "white",
                     }}
+                    onComplete={() => onCompleteRep(reparation.id)}
+                    onCancel={() => onCancelRep(reparation.id)}
                     index={index}
                     key={index}
                     row={reparation}
@@ -355,26 +413,6 @@ const WorkshopPage = () => {
               }}
             ></TableVirtuoso>
           </Box>
-          <Snackbar
-            open={success}
-            autoHideDuration={3600}
-            onClose={(event: Event, reason?: SnackbarCloseReason) => {
-              if (reason === 'clickaway') {
-                return;
-              }
-              setSuccess(false);
-            }}
-          >
-            <Alert
-              onClose={() => {
-                setSuccess(false);
-              }}
-              variant="filled"
-              severity="success"
-            >
-              La reparación fue creada con exito
-            </Alert>
-          </Snackbar>
         </Paper>
       </Grid>
       <Dialog
@@ -413,7 +451,7 @@ const WorkshopPage = () => {
               clickee el boton
             </Typography>
             <Link
-              to={"/"}
+              to={"newVehicle"}
               style={{ textDecoration: "none", maxWidth: "fit-content" }}
             >
               <Button

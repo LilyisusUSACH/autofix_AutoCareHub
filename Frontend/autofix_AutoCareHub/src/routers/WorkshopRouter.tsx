@@ -2,7 +2,11 @@ import {BrowserRouter as Router, Route, Routes} from 'react-router-dom'
 import HelloWorld from '../components/HelloWorld';
 import NavBarVariantWork from '../components/NavBarVariantWork';
 import WorkshopPage from '../components/WorkshopPage';
-import { ThemeProvider, createTheme } from '@mui/material';
+import { IconButton, ThemeProvider, colors, createTheme } from '@mui/material';
+import { SnackbarProvider, closeSnackbar } from 'notistack';
+import CloseIcon from "@mui/icons-material/Close";
+import React from 'react';
+import NewVehiclePage from '../components/NewVehiclePage';
 
 
 const theme = createTheme({
@@ -26,18 +30,28 @@ const theme = createTheme({
       }
     },
   });
-  
+
+const actionar = (snackbarID) => (
+  <React.Fragment>
+    <IconButton sx={{color:'white'}} onClick={() => closeSnackbar(snackbarID)}>
+      <CloseIcon></CloseIcon>
+    </IconButton>
+  </React.Fragment>
+)
 
 const WorkshopRouter = () => {
     return (
+      <SnackbarProvider maxSnack={3} autoHideDuration={3600} action={actionar} >
         <ThemeProvider theme={theme}>
             <div className=''>
                 <NavBarVariantWork/>
                 <Routes>
+                    <Route path='/newVehicle' element={<NewVehiclePage/>}/>
                     <Route path='/' element={<WorkshopPage/>}/>
                 </Routes>
             </div>
         </ThemeProvider>
+        </SnackbarProvider>
     );
 }
 

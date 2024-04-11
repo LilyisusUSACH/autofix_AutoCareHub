@@ -7,6 +7,7 @@ import com.autofix.AutoCareHub.Entities.VehicleEntity;
 import com.autofix.AutoCareHub.Enums.ERepValue;
 import com.autofix.AutoCareHub.Repositories.ReparationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -27,7 +28,7 @@ public class RepairService {
 
         // Find all
     public ArrayList<ReparationEntity> getAllReparations(){
-        return (ArrayList<ReparationEntity>) reparationRepository.findAll();
+        return (ArrayList<ReparationEntity>) reparationRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
     }
 
         // Find all Actives
@@ -116,4 +117,7 @@ public class RepairService {
     }
     // delete ?
 
+    public void deleteReparation(Long id){
+        reparationRepository.deleteById(id);
+    }
 }

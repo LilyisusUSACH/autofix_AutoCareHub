@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface ReparationRepository extends JpaRepository<ReparationEntity, Long> {
+
     Optional<ReparationEntity> findByReceipt_PatentePatente(String patente);
 
     ArrayList<ReparationEntity> findAllByFechaSalidaIsNull();
@@ -28,4 +29,5 @@ public interface ReparationRepository extends JpaRepository<ReparationEntity, Lo
 
     int countByFechaIngresoBetweenAndReceipt_Patente(LocalDate inicio, LocalDate termino, VehicleEntity patente);
 
+    void deleteById(Long id);
 }
