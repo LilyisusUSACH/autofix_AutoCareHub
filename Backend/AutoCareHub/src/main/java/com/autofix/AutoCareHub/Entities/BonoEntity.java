@@ -25,7 +25,7 @@ public class BonoEntity {
 
     private int amount;
 
-    @OneToOne()
+    @ManyToOne()
     @JoinColumn(name = "vehiculo_id")
     private VehicleEntity vehicle;
 

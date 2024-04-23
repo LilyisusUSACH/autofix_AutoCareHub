@@ -75,8 +75,8 @@ const columns: ColumnData[] = [
     label: "Fecha inicio",
   },
   {
-    width: 40,
-    label: "Completar",
+    width: 80,
+    label: "Fecha Termino",
   },
   {
     width: 40,
@@ -87,7 +87,7 @@ const columns: ColumnData[] = [
 // TODO: arreglar fuentes
 const Fila = (props: { style: object; index: number; row: Reparation, onComplete:unknown, onCancel:unknown }) => {
   const { style, index, row, onComplete, onCancel } = props;
-  console.log(typeof(onComplete));
+  //console.log(typeof(onComplete));
   return (
     <>
       <TableCell sx={style} align="center" component="th" scope="row">
@@ -121,23 +121,7 @@ const Fila = (props: { style: object; index: number; row: Reparation, onComplete
         sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
         align="center"
       >
-        <IconButton
-          size="medium"
-          aria-label="complete"
-          onClick={onComplete}
-          sx={{
-            marginBlock: "-10px",
-            border:'0.5px solid black',
-            backgroundColor:'#5CD000',
-            color: "white",
-            "&:hover":{
-              backgroundColor:'#5CD000',
-              filter:'brightness(120%)'
-            }
-          }}
-        >
-          <CheckIcon fontSize="large" />
-        </IconButton>
+        {row.fechaSalida + ' ' + row.horaSalida}
       </TableCell>
       <TableCell
         sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
@@ -162,76 +146,13 @@ const Fila = (props: { style: object; index: number; row: Reparation, onComplete
   );
 };
 
-
-
-const WorkshopPage = () => {
+const WorkshopHistoryPage = () => {
   const [filtered, setfiltered] = useState<Reparation[]>([]);
   const [reparations, setReparations] = useState<Reparation[]>([]);
-  const [open, setOpen] = React.useState(false);
-  const [error, setError] = useState(false);
-
-  const [formData, setFormData] = useState({
-    patente: "",
-    typeRep: 0,
-  });
-
-  const onCancelRep = (id:number) => {
-    enqueueSnackbar('Se cancelo la reparacion', 
-      { variant:'error'});
-
-    workshopService.deleteReparation(id).then((response) =>{
-      console.log(response);
-      init();
-    }
-    );
-  }
-
-  const onCompleteRep = (id:number) => {
-    workshopService.completeReparation(id).then((response) =>{
-      console.log(response);
-      enqueueSnackbar("Se completo la reparación", {variant:'info'})
-      init();
-    }
-    );
-  }
-
-  const handleSubmit = () => {
-    workshopService
-      .postNewReparation({
-        patente: formData.patente.toUpperCase(),
-        typeRep: (formData.typeRep+1),
-      })
-      .then(() => {
-        //console.log(response);
-        setError(false);
-        handleClose();
-        init();
-        handleSearch("");
-        enqueueSnackbar('La reparación fue creada con éxito', { variant:'success' })
-      })
-      .catch(() => setError(true));
-  };
-  const handleChange = (event:ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [event.target.name]:
-        event.target.name == "patente"
-          ? event.target.value.toUpperCase()
-          : event.target.value,
-    });
-  };
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setError(false);
-    setOpen(false);
-  };
 
   const init = () => {
     workshopService
-      .getActiveReparations()
+      .getReparations()
       .then((response) => {
         setReparations(response.data);
         setfiltered(response.data);
@@ -388,161 +309,7 @@ const WorkshopPage = () => {
           </Box>
         </Paper>
       </Grid>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-        PaperProps={{
-          sx: { height: "70%", borderRadius: "25px" },
-        }}
-      >
-        <Grid
-          container
-          direction={"column"}
-          justifyContent={"space-evenly"}
-          alignItems={"center"}
-          height={"100%"}
-        >
-          <Grid item>
-            <Typography fontWeight={800} variant="h4">
-              {"Nueva Reparación"}
-            </Typography>
-            <Divider
-              variant="fullWidth"
-              sx={{
-                mt: "2%",
-                borderBottomWidth: "1px",
-                opacity: 1,
-                background: "black",
-              }}
-            ></Divider>
-          </Grid>
-          <Grid item textAlign={"center"} width={"70%"}>
-            <Typography variant="h6" fontStyle={"italic"}>
-              Primero debe registrar el ingreso del vehiculo Si aun no lo hace
-              clickee el boton
-            </Typography>
-            <Link
-              to={"newVehicle"}
-              style={{ textDecoration: "none", maxWidth: "fit-content" }}
-            >
-              <Button
-                variant="contained"
-                sx={{
-                  margin: "3px 10px 3px 10px",
-                  paddingInline: "5%",
-                  backgroundColor: "aqua.main",
-                  color: "black.main",
-                  borderRadius: "10px",
-                  "&:hover": {
-                    backgroundColor: "aqua.main",
-                    filter: "brightness(95%)",
-                  },
-                }}
-              >
-                Ingresar vehículo
-              </Button>
-            </Link>
-          </Grid>
-          <Grid item width={"70%"}>
-            <TextField
-              // TODO: validar
-              required
-              fullWidth
-              sx={{
-                letterSpacing: "200px",
-                mb: 4,
-              }}
-              InputProps={{
-                style: { letterSpacing: "20px" },
-              }}
-              name="patente"
-              value={formData.patente}
-              onChange={handleChange}
-              label="Patente"
-              variant="filled"
-              size="small"
-            />
-            <TextField
-              select
-              required
-              label="Selecciona"
-              defaultValue={0}
-              name="typeRep"
-              value={formData.typeRep}
-              onChange={handleChange}
-              helperText="Seleccione el tipo de reparacion que se le hara al vehiculo ingresado"
-              variant="filled"
-              size="small"
-              fullWidth
-            >
-              {repTypes.map((option, index) => (
-                <MenuItem key={index} value={index}>
-                  {option}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
-          <Grid item>
-            <Button
-              variant="contained"
-              onClick={handleSubmit}
-              sx={{
-                backgroundColor: "pink.main",
-                borderRadius: "10px",
-                "&:hover": {
-                  backgroundColor: "pink.main",
-                  filter: "brightness(95%)",
-                },
-              }}
-            >
-              Registrar Reparación
-            </Button>
-          </Grid>
-        </Grid>
-        <Collapse in={error}>
-          <Alert
-            sx={{
-              zIndex: 10,
-              position: "fixed",
-              width: "37%",
-              bottom: "4%",
-            }}
-            severity="error"
-            onClose={() => {
-              setError(false);
-            }}
-          >
-            No se pudo crear la reparación
-          </Alert>
-        </Collapse>
-      </Dialog>
-
-      <Fab
-        size="large"
-        onClick={handleClickOpen}
-        sx={{
-          position: "fixed",
-          bottom: "4%",
-          right: "2%",
-          color: "common.white",
-          border: "0.5px solid black",
-          bgcolor: "aqua.main",
-          "&:hover": {
-            bgcolor: "#30A3C9",
-          },
-        }}
-        aria-label="add"
-      >
-        <AddIcon
-          style={{
-            width: "90%",
-            height: "90%",
-          }}
-        />
-      </Fab>
     </>
   );
 };
-export default WorkshopPage;
+export default WorkshopHistoryPage;

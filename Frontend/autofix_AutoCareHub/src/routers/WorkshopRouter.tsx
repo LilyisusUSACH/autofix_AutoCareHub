@@ -7,6 +7,7 @@ import { SnackbarProvider, closeSnackbar } from 'notistack';
 import CloseIcon from "@mui/icons-material/Close";
 import React from 'react';
 import NewVehiclePage from '../components/NewVehiclePage';
+import WorkshopHistoryPage from '../components/WorkshopHistoryPage';
 
 
 const theme = createTheme({
@@ -47,6 +48,7 @@ const WorkshopRouter = () => {
                 <NavBarVariantWork/>
                 <Routes>
                     <Route path='/newVehicle' element={<NewVehiclePage/>}/>
+                    <Route path='/history' element={<WorkshopHistoryPage/>}/>
                     <Route path='/' element={<WorkshopPage/>}/>
                 </Routes>
             </div>

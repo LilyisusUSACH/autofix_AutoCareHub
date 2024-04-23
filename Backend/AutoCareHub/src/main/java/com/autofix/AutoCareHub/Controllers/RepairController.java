@@ -39,6 +39,7 @@ public class RepairController {
 
     @PostMapping("/")
     public ResponseEntity<?> registerReparation(@RequestBody RegisterReparationDTO reparationDTO){
+        reparationDTO.setPatente( reparationDTO.getPatente().toUpperCase() );
         return ResponseEntity.ok( receiptService.registerReparation(reparationDTO) );
     }
 
