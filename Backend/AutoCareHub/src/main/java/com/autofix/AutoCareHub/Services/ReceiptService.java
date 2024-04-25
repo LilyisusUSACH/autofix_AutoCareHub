@@ -3,6 +3,7 @@ package com.autofix.AutoCareHub.Services;
 import com.autofix.AutoCareHub.Controllers.Request.RegisterReparationDTO;
 import com.autofix.AutoCareHub.Entities.*;
 import com.autofix.AutoCareHub.Enums.*;
+import com.autofix.AutoCareHub.Repositories.DetailRepository;
 import com.autofix.AutoCareHub.Repositories.ReceiptRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,9 @@ import java.time.LocalTime;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.autofix.AutoCareHub.Constants.Constants.*;
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -62,6 +65,10 @@ public class ReceiptService {
     public Optional<ReceiptEntity> findReceiptUnpaidByPatente(String patente){
         return receiptRepository.findByPatente_PatenteAndPagadoIsFalse(patente);
     }
+
+    public List<ReceiptEntity> findReceiptsUnpaidByPatente(String patente){
+        return receiptRepository.findAllByPatente_PatenteAndPagadoIsFalse(patente);
+    }
     // save
 
     public ReceiptEntity createReceiptEmpty(String patente){ // TODO: cambiar el elseThrow
@@ -84,15 +91,18 @@ public class ReceiptService {
         return receipt;
     }
 
-    // update
-
     public ReparationEntity registerReparation(RegisterReparationDTO reparationDTO){
         int[] a = ERepValue.DIESEL.getValues();
         Optional<ReceiptEntity> optionalReceipt = findReceiptUnpaidByPatente(reparationDTO.getPatente());
         ReceiptEntity receipt = optionalReceipt.orElseGet(() -> createReceiptEmpty(reparationDTO.getPatente()));
+        //if(receipt.getCostoTotal()!=0) receipt = createReceiptEmpty(reparationDTO.getPatente());
         ReparationEntity reparation = ReparationEntity.builder()
-                .fechaIngreso(LocalDate.now())
-                .horaIngreso(LocalTime.now())
+                .fechaIngreso((reparationDTO.getFechaIngreso() == null)?LocalDate.now():reparationDTO.getFechaIngreso())
+                .horaIngreso((reparationDTO.getHoraIngreso() == null)?LocalTime.now():reparationDTO.getHoraIngreso()) //LocalTime.now()
+                .fechaSalida(reparationDTO.getFechaSalida())
+                .horaSalida(reparationDTO.getHoraSalida())
+                .fechaRetiro(reparationDTO.getFechaRetiro())
+                .horaRetiro(reparationDTO.getHoraRetiro())
                 .typeRep(reparationDTO.getTypeRep())
                 .montoTotal(
                         switch (receipt.getPatente().getMotorType()){
@@ -133,7 +143,7 @@ public class ReceiptService {
             case electrico -> EDiscNRep.ELECTRICO.getValues()[cantidad];
         };
         detailService.createDetail(EDiscountsRecharges.descuento_reparaciones,
-                Math.round(costoReparaciones*discount) , discount, receipt);
+                -1*Math.round(costoReparaciones*discount) , -1*discount, receipt);
         return Math.round(costoReparaciones*discount);
         // TODO: ver si redondear o truncar ((int) el casteo trunca) o tirar para arriba (Math.ceil(f))D:
     }
@@ -159,7 +169,7 @@ public class ReceiptService {
 
             if(ingresoHours.isAfter(start) && ingresoHours.isBefore(end)){
                 detailService.createDetail(EDiscountsRecharges.descuento_dia,
-                        Math.round(costoReparaciones*descuento), descuento, receipt);
+                        -1*Math.round(costoReparaciones*descuento), -1*descuento, receipt);
              return Math.round(costoReparaciones*descuento);
             }
         }
@@ -230,9 +240,15 @@ public class ReceiptService {
         return Math.round( costoReparaciones * (diference * 0.05f));
     }
 
-    public ReceiptEntity calculateAmountByPatente(String patente, Boolean applyBono){
+    public ReceiptEntity calculateAmountByPatente(String patente, Boolean applyBono) throws Exception {
         Optional<ReceiptEntity> optionalReceipt = findReceiptUnpaidByPatente(patente);
-        ReceiptEntity receipt = optionalReceipt.orElseThrow();
+        if(optionalReceipt.isEmpty()){
+            throw new Exception("No hay recibos pendientes");
+        }
+        ReceiptEntity receipt = optionalReceipt.get();
+        if(receipt.getCostoTotal()>0) {
+            receipt.setCostoTotal(0);
+        };
         int sumaRep = receipt.getReparaciones().stream().mapToInt(ReparationEntity::getMontoTotal).sum();
 //        for (ReparationEntity reparation : receipt.getReparaciones()) {
 //            sumaRep += reparation.getMontoTotal();
@@ -243,13 +259,16 @@ public class ReceiptService {
 
         int discounts = nReparationsDiscount(receipt,sumaRep) +
                 ingresoDiscount(receipt, sumaRep);
-        if(applyBono) {
+        if(applyBono || receipt.getBono()==null) {
             Optional<BonoEntity> bono = bonoService.findBonoDisponibleByMarca(receipt.getPatente().getMarca());
             if (bono.isPresent()) {
-                discounts += bonoService.useBono(bono.get(), receipt.getPatente()); // TODO: hacer esto cuando termine el bono service
+                discounts += bonoService.useBono(bono.get(), receipt); // TODO: hacer esto cuando termine el bono service
                 detailService.createDetail(EDiscountsRecharges.descuento_bono,
-                        bono.get().getAmount(), 1, receipt);
+                        -1*bono.get().getAmount(), -1, receipt);
             }
+        }
+        if(receipt.getBono()!=null){
+            discounts += receipt.getBono().getAmount();
         }
         int recargos = kmRecargo(receipt, sumaRep) +
                 oldRecargo(receipt, sumaRep) +
@@ -264,4 +283,13 @@ public class ReceiptService {
     }
     //     public ReceiptEntity calculateAmountByReceipt(ReceiptEntity receipt){
     // delete
+
+    public boolean deleteReceipt(Long id){
+        try{
+            receiptRepository.deleteById(id);
+            return true;
+        }catch (Exception e) {
+            return false;
+        }
+    }
 }

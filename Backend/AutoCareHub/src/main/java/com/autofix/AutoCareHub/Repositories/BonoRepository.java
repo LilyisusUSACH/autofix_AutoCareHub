@@ -12,5 +12,6 @@ import java.util.Optional;
 public interface BonoRepository extends JpaRepository<BonoEntity, Long> {
 
     ArrayList<BonoEntity> getAllByMarca(String marca);
-    Optional<BonoEntity> getByMarcaAndUsadoIsFalse(String marca);
+    Optional<BonoEntity> getFirstByMarcaAndUsadoIsFalse(String marca);
+
 }

@@ -30,6 +30,9 @@ public class ReceiptEntity {
     @OneToMany(mappedBy = "receipt")
     private List<ReparationEntity> reparaciones = new ArrayList<>();
 
+    @OneToOne
+    @JoinColumn(name = "bono_id")
+    private BonoEntity bono;
     //@Embeddable
     //@CollectionTable(name="detalles")
     //private ArrayList<Integer> detail = new ArrayList<Integer>();
@@ -42,4 +45,6 @@ public class ReceiptEntity {
     private Boolean pagado;
 
     private int costoTotal;
+
+
 }

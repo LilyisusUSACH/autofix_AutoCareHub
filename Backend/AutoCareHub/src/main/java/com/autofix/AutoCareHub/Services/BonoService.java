@@ -2,6 +2,7 @@ package com.autofix.AutoCareHub.Services;
 
 import com.autofix.AutoCareHub.Controllers.Request.AddNewBonoDTO;
 import com.autofix.AutoCareHub.Entities.BonoEntity;
+import com.autofix.AutoCareHub.Entities.ReceiptEntity;
 import com.autofix.AutoCareHub.Entities.VehicleEntity;
 import com.autofix.AutoCareHub.Repositories.BonoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +25,13 @@ public class BonoService {
     }
 
     public Optional<BonoEntity> findBonoDisponibleByMarca(String marca){
-        return bonoRepository.getByMarcaAndUsadoIsFalse(marca);
+        return bonoRepository.getFirstByMarcaAndUsadoIsFalse(marca);
     }
 
-    public int useBono(BonoEntity bono, VehicleEntity vehicle){
-        bono.setVehicle(vehicle);
+    public int useBono(BonoEntity bono, ReceiptEntity receipt){
+        bono.setReceipt(receipt);
         bono.setUsado(true);
+        receipt.setBono(bono);
         bonoRepository.save(bono);
         return bono.getAmount();
     }

@@ -34,5 +34,4 @@ public class DetailService {
         detailRepository.save(detail);
         return detail;
     }
-
 }

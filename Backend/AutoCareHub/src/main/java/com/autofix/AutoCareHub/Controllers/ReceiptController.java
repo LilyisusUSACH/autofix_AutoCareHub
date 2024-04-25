@@ -2,6 +2,7 @@ package com.autofix.AutoCareHub.Controllers;
 
 import com.autofix.AutoCareHub.Services.ReceiptService;
 import org.apache.coyote.Response;
+import org.hibernate.NonUniqueResultException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +44,10 @@ public class ReceiptController {
         try{
             return ResponseEntity.ok( receiptService.calculateAmountByPatente(patente, applyBono) );
         }catch (Exception e){
-            return ResponseEntity.badRequest().body("Error, debe primero finalizar las reparaciones");
+            if (e.getMessage().equals("Calculado con anterioridad")){
+                return ResponseEntity.badRequest().body("Error, ya fue calculado");
+            }
+            return ResponseEntity.badRequest().body(e.getMessage());
 
         }
     }

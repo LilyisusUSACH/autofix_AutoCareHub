@@ -61,6 +61,13 @@ public class VehicleService {
 
 
     // delete ?
-
+    public boolean deleteVehicle(Long id_vehicle){
+        try{
+            vehicleRepository.deleteById(id_vehicle);
+            return true;
+        }catch (Exception e) {
+            return false;
+        }
+    }
 
 }

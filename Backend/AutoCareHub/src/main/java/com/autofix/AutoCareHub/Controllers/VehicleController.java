@@ -96,6 +96,15 @@ public class VehicleController {
         return ResponseEntity.ok(vehicle);
     }
 
+    @DeleteMapping("/")
+    public ResponseEntity<?> deleteVehicle(@RequestParam Long id_vehicle){
+        if(vehicleService.deleteVehicle(id_vehicle))
+            return ResponseEntity.ok("Deleted");
+        else{
+            return ResponseEntity.notFound().build();
+        }
+
+    }
 
 
 }

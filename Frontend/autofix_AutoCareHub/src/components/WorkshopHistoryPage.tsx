@@ -1,17 +1,12 @@
 import {
-  Alert,
   Box,
   Button,
   Collapse,
-  Dialog,
   Divider,
-  Fab,
   Grid,
   IconButton,
   InputAdornment,
   Paper,
-  Snackbar,
-  SnackbarCloseReason,
   Table,
   TableBody,
   TableCell,
@@ -21,7 +16,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import MenuItem from '@mui/material/MenuItem';
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
+import MenuItem from "@mui/material/MenuItem";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import CheckIcon from "@mui/icons-material/Check";
@@ -36,6 +33,70 @@ import { Reparation, Vehicle, ColumnData } from "../types/types";
 
 // TODO: Separar Por componentes lo que se pueda
 
+const ExpandableRow = ({ context, item: user, ...restProps }) => {
+  //console.log(user)
+  const isExpanded = context.getIsExpanded(user);
+  return (
+    <>
+      <TableRow
+        {...restProps}
+        onClick={() => context.setIsExpanded(user)}
+        style={{
+          background: restProps["data-index"] % 2 == 0 ? "lightgrey" : "white",
+        }}
+        key={user.id}
+      >
+        <Fila
+          index={restProps["data-index"]}
+          onInfo={() => null}
+          row={user}
+        ></Fila>
+      </TableRow>
+      <TableRow
+        style={{
+          backgroundColor:
+            restProps["data-index"] % 2 == 0 ? "lightgrey" : "white",
+        }}
+      >
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
+          <Collapse
+            in={isExpanded}
+            timeout="auto"
+            unmountOnExit
+          >
+            <Grid container>
+              <Grid item xs={2}>
+                <Typography variant="h4">Detalles</Typography>
+              </Grid>
+              <Grid
+                item
+                xs={5}
+                container
+                direction={"column"}
+                textAlign={"center"}
+              >
+                <Typography variant="h5">Ver recibo</Typography>
+                <Divider></Divider>
+                <IconButton
+                  sx={{
+                    margin: "auto",
+                    my: "10px",
+                    width: "fit-content",
+                    border: "0.5px solid black",
+                    backgroundColor: "#25D8B7B0",
+                  }}
+                >
+                  <ReceiptLongOutlinedIcon fontSize="large" />
+                </IconButton>
+              </Grid>
+            </Grid>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </>
+  );
+};
+
 const VirtuosoTableComponents: TableComponents<Reparation> = {
   Scroller: React.forwardRef<HTMLDivElement>((props, ref) => (
     <TableContainer component={Box} {...props} ref={ref} />
@@ -47,7 +108,7 @@ const VirtuosoTableComponents: TableComponents<Reparation> = {
     />
   ),
   TableHead,
-  TableRow: ({ item: _item, ...props }) => <TableRow {...props} />,
+  TableRow: ExpandableRow,
   TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
     <TableBody {...props} ref={ref} />
   )),
@@ -80,66 +141,44 @@ const columns: ColumnData[] = [
   },
   {
     width: 40,
-    label: "Cancelar",
+    label: "",
   },
 ];
 // TODO: poner botones y crear los update / delete
 // TODO: arreglar fuentes
-const Fila = (props: { style: object; index: number; row: Reparation, onComplete:unknown, onCancel:unknown }) => {
-  const { style, index, row, onComplete, onCancel } = props;
+const Fila = (props: { index: number; row: Reparation; onInfo: unknown }) => {
+  const { index, row, onInfo } = props;
   //console.log(typeof(onComplete));
   return (
     <>
-      <TableCell sx={style} align="center" component="th" scope="row">
+      <TableCell align="center" component="th" scope="row">
         {row.vehiculo.patente.toUpperCase()}
       </TableCell>
-      <TableCell
-        sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
-        align="center"
-      >
-        {row.vehiculo.marca.toUpperCase()}
-      </TableCell>
-      <TableCell
-        sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
-        align="center"
-      >
-        {row.vehiculo.modelo.toUpperCase()}
-      </TableCell>
-      <TableCell
-        sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
-        align="center"
-      >
-        {repTypes[row.typeRep]}
-      </TableCell>
-      <TableCell
-        sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
-        align="center"
-      >
+      <TableCell align="center">{row.vehiculo.marca.toUpperCase()}</TableCell>
+      <TableCell align="center">{row.vehiculo.modelo.toUpperCase()}</TableCell>
+      <TableCell align="center">{repTypes[row.typeRep]}</TableCell>
+      <TableCell align="center">
         {row.fechaIngreso + " " + row.horaIngreso.slice(0, 5)}
       </TableCell>
-      <TableCell
-        sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
-        align="center"
-      >
-        {row.fechaSalida + ' ' + row.horaSalida}
+      <TableCell align="center">
+        {row.fechaSalida + " " + row.horaSalida}
       </TableCell>
-      <TableCell
-        sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
-        align="center"
-      >
-        <IconButton sx={{
+      <TableCell align="center">
+        <IconButton
+          sx={{
             marginBlock: "-10px",
-            border:'0.5px solid black',
-            backgroundColor:'#E91E63',
+            backgroundColor: "#00A3FFc0",
             color: "white",
-            "&:hover":{
-              backgroundColor:'#E91E63',
-              filter:'brightness(80%)'
-            }
-          }} 
-          onClick={onCancel}
-          aria-label="cancel" size="medium">
-          <CloseIcon fontSize="large" />
+            "&:hover": {
+              backgroundColor: "#00A3FF70",
+              filter: "brightness(80%)",
+            },
+          }}
+          onClick={onInfo}
+          aria-label="info"
+          size="small"
+        >
+          <InfoOutlinedIcon fontSize="large" />
         </IconButton>
       </TableCell>
     </>
@@ -149,6 +188,23 @@ const Fila = (props: { style: object; index: number; row: Reparation, onComplete
 const WorkshopHistoryPage = () => {
   const [filtered, setfiltered] = useState<Reparation[]>([]);
   const [reparations, setReparations] = useState<Reparation[]>([]);
+  const [expandedIds, setExpandedIds] = useState<number[]>([]);
+  const [openRow, setOpenRow] = useState(false);
+
+  const handleScroll = () => {
+    console.log("handleScroll")
+    setExpandedIds([])
+  };
+
+  const getIsExpanded = (rep: Reparation) => expandedIds.includes(rep.id);
+
+  const onIsExpandedChange = (rep: Reparation) => {
+    if (getIsExpanded(rep)) {
+      setExpandedIds(expandedIds.filter((id) => id !== rep.id));
+    } else {
+      setExpandedIds([...expandedIds, rep.id]);
+    }
+  };
 
   const init = () => {
     workshopService
@@ -205,8 +261,8 @@ const WorkshopHistoryPage = () => {
           elevation={10}
           square={false}
           sx={{
-            position:'relative',
-            alignContent:"end",
+            position: "relative",
+            alignContent: "end",
             width: "95%",
             height: "90%",
             borderRadius: "25px",
@@ -216,13 +272,13 @@ const WorkshopHistoryPage = () => {
             container
             justifyContent={"space-between"}
             width={"95%"}
-            margin={'auto'}
+            margin={"auto"}
             mt={"2%"}
             rowGap={"10px"}
-            position={'absolute'}
-            zIndex={'10'}
-            top={'0%'}
-            left={'3%'}
+            position={"absolute"}
+            zIndex={"10"}
+            top={"0%"}
+            left={"3%"}
           >
             <Grid item xs={12} sm={5} md={4}>
               <Typography fontWeight={800} variant="h5">
@@ -260,15 +316,17 @@ const WorkshopHistoryPage = () => {
             </Grid>
           </Grid>
 
-          <Box
-            alignContent={"center"}
-            height={"85%"}
-            justifyContent={"center"}
-          >
+          <Box alignContent={"center"} height={"85%"} justifyContent={"center"}>
             <TableVirtuoso
               style={{ height: "100%", borderRadius: "0 0 25px 25px" }}
               data={filtered}
               components={VirtuosoTableComponents}
+              overscan={5}
+              onScroll={handleScroll}
+              context={{
+                getIsExpanded: getIsExpanded,
+                setIsExpanded: onIsExpandedChange,
+              }}
               fixedHeaderContent={() => (
                 <TableRow
                   style={{
@@ -291,20 +349,6 @@ const WorkshopHistoryPage = () => {
                   })}
                 </TableRow>
               )}
-              itemContent={(index, reparation) => {
-                return (
-                  <Fila
-                    style={{
-                      background: index % 2 == 0 ? "lightgrey" : "white",
-                    }}
-                    onComplete={() => onCompleteRep(reparation.id)}
-                    onCancel={() => onCancelRep(reparation.id)}
-                    index={index}
-                    key={index}
-                    row={reparation}
-                  ></Fila>
-                );
-              }}
             ></TableVirtuoso>
           </Box>
         </Paper>
