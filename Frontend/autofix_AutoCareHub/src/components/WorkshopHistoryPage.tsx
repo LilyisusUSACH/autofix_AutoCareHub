@@ -17,6 +17,8 @@ import {
   Typography,
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import CarRepairIcon from "@mui/icons-material/CarRepair";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import MenuItem from "@mui/material/MenuItem";
 import AddIcon from "@mui/icons-material/Add";
@@ -30,6 +32,7 @@ import { TableComponents, TableVirtuoso } from "react-virtuoso";
 import { Link, useNavigate } from "react-router-dom";
 import { closeSnackbar, enqueueSnackbar, VariantType } from "notistack";
 import { Reparation, Vehicle, ColumnData } from "../types/types";
+import { formatCurrency } from '../utils/utils';
 
 // TODO: Separar Por componentes lo que se pueda
 
@@ -46,11 +49,7 @@ const ExpandableRow = ({ context, item: user, ...restProps }) => {
         }}
         key={user.id}
       >
-        <Fila
-          index={restProps["data-index"]}
-          onInfo={() => null}
-          row={user}
-        ></Fila>
+        <Fila expanded={isExpanded} row={user}></Fila>
       </TableRow>
       <TableRow
         style={{
@@ -59,35 +58,99 @@ const ExpandableRow = ({ context, item: user, ...restProps }) => {
         }}
       >
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
-          <Collapse
-            in={isExpanded}
-            timeout="auto"
-            unmountOnExit
-          >
+          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
             <Grid container>
-              <Grid item xs={2}>
+              <Grid
+                item
+                xs={2}
+                style={{
+                  marginBlock: "auto",
+                }}
+                textAlign={"center"}
+              >
                 <Typography variant="h4">Detalles</Typography>
               </Grid>
               <Grid
                 item
-                xs={5}
+                xs={10}
                 container
                 direction={"column"}
                 textAlign={"center"}
               >
-                <Typography variant="h5">Ver recibo</Typography>
+                <Grid container justifyContent={"space-around"}>
+                  <Grid item xs={2}>
+                    <Typography variant="h5">Ver recibo</Typography>
+                  </Grid>
+                  <Grid item xs={3}>
+                    <Typography
+                      variant="h5"
+                      style={{
+                        margin: "auto",
+                      }}
+                    >
+                      Ver vehiculo
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3}>
+                    <Typography
+                      variant="h5"
+                      style={{
+                        margin: "auto",
+                      }}
+                    >
+                      Costo Reparacion
+                    </Typography>
+                  </Grid>
+                </Grid>
                 <Divider></Divider>
-                <IconButton
-                  sx={{
-                    margin: "auto",
-                    my: "10px",
-                    width: "fit-content",
-                    border: "0.5px solid black",
-                    backgroundColor: "#25D8B7B0",
-                  }}
-                >
-                  <ReceiptLongOutlinedIcon fontSize="large" />
-                </IconButton>
+                <Grid container justifyContent={"space-around"}>
+                  <Grid item xs={2}>
+                    <IconButton
+                      sx={{
+                        margin: "auto",
+                        my: "10px",
+                        width: "fit-content",
+                        border: "1px solid black",
+                        color: "#000000FF",
+                        backgroundColor: "#25D8B7",
+                        "&:hover": {
+                          backgroundColor: "#25D8B7",
+                          filter: "brightness(90%)",
+                        },
+                      }}
+                    >
+                      <ReceiptLongIcon fontSize="large" />
+                    </IconButton>
+                  </Grid>
+                  <Grid item xs={3}>
+                    <IconButton
+                      sx={{
+                        margin: "auto",
+                        my: "10px",
+                        width: "fit-content",
+                        border: "1px solid black",
+                        color: "#000000FF",
+                        backgroundColor: "#FF4090",
+                        "&:hover": {
+                          backgroundColor: "#FF4090",
+                          filter: "brightness(90%)",
+                        },
+                      }}
+                    >
+                      <CarRepairIcon fontSize="large" />
+                    </IconButton>
+                  </Grid>
+                  <Grid item xs={3}>
+                    <Typography
+                      variant="h5"
+                      style={{
+                        margin: "auto",
+                      }}
+                    >
+                      {formatCurrency(user.montoTotal)}
+                    </Typography>
+                  </Grid>
+                </Grid>
               </Grid>
             </Grid>
           </Collapse>
@@ -146,8 +209,8 @@ const columns: ColumnData[] = [
 ];
 // TODO: poner botones y crear los update / delete
 // TODO: arreglar fuentes
-const Fila = (props: { index: number; row: Reparation; onInfo: unknown }) => {
-  const { index, row, onInfo } = props;
+const Fila = (props: { expanded: boolean; row: Reparation }) => {
+  const { row, expanded } = props;
   //console.log(typeof(onComplete));
   return (
     <>
@@ -156,25 +219,24 @@ const Fila = (props: { index: number; row: Reparation; onInfo: unknown }) => {
       </TableCell>
       <TableCell align="center">{row.vehiculo.marca.toUpperCase()}</TableCell>
       <TableCell align="center">{row.vehiculo.modelo.toUpperCase()}</TableCell>
-      <TableCell align="center">{repTypes[row.typeRep]}</TableCell>
+      <TableCell align="center">{repTypes[row.typeRep-1]}</TableCell>
       <TableCell align="center">
         {row.fechaIngreso + " " + row.horaIngreso.slice(0, 5)}
       </TableCell>
       <TableCell align="center">
-        {row.fechaSalida + " " + row.horaSalida}
+        {row.fechaSalida? row.fechaSalida + " " + row.horaSalida : "Aun en taller"}
       </TableCell>
       <TableCell align="center">
         <IconButton
           sx={{
             marginBlock: "-10px",
-            backgroundColor: "#00A3FFc0",
+            backgroundColor: expanded ? "#5CD000" : "#00A3FFc0",
             color: "white",
             "&:hover": {
-              backgroundColor: "#00A3FF70",
-              filter: "brightness(80%)",
+              backgroundColor: "#00A3FFA0",
+              filter: "brightness(120%)",
             },
           }}
-          onClick={onInfo}
           aria-label="info"
           size="small"
         >
@@ -192,8 +254,8 @@ const WorkshopHistoryPage = () => {
   const [openRow, setOpenRow] = useState(false);
 
   const handleScroll = () => {
-    console.log("handleScroll")
-    setExpandedIds([])
+    console.log("handleScroll");
+    setExpandedIds([]);
   };
 
   const getIsExpanded = (rep: Reparation) => expandedIds.includes(rep.id);
@@ -229,7 +291,7 @@ const WorkshopHistoryPage = () => {
         fila.vehiculo.modelo
           .toLowerCase()
           .includes(valorBuscado.toLowerCase()) ||
-        repTypes[fila.typeRep]
+        repTypes[fila.typeRep-1]
           .toLowerCase()
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "")

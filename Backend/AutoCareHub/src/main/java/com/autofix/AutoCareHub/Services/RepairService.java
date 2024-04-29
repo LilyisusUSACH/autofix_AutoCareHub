@@ -1,5 +1,6 @@
 package com.autofix.AutoCareHub.Services;
 
+import com.autofix.AutoCareHub.Controllers.Request.R2DTO;
 import com.autofix.AutoCareHub.Controllers.Request.RegisterReparationDTO;
 import com.autofix.AutoCareHub.Entities.ReceiptEntity;
 import com.autofix.AutoCareHub.Entities.ReparationEntity;
@@ -12,10 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 //TODO: UPDATES Y SAVES
 

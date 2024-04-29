@@ -9,10 +9,10 @@ import java.util.Optional;
 
 @Repository
 public interface ReceiptRepository extends JpaRepository<ReceiptEntity, Long> {
-    Optional<ReceiptEntity> findByPatente_Patente(String patente);
+    Optional<ReceiptEntity> findByPatente_PatenteOrderByPagadoDesc(String patente);
     Optional<ReceiptEntity> findByPatente_PatenteAndPagadoIsFalse(String patente);
 
     List<ReceiptEntity> findAllByPatente_PatenteAndPagadoIsFalse(String patente);
 
-    List<ReceiptEntity> findAllByPatente_Patente(String patente);
+    List<ReceiptEntity> findAllByPatente_PatenteOrderByIdDesc(String patente);
 }

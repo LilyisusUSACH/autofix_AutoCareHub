@@ -49,7 +49,7 @@ const WorkshopRouter = () => {
                 <Routes>
                     <Route path='/newVehicle' element={<NewVehiclePage/>}/>
                     <Route path='/history' element={<WorkshopHistoryPage/>}/>
-                    <Route path='/' element={<WorkshopPage/>}/>
+                    <Route path='/' element={<WorkshopPage/>}/> 
                 </Routes>
             </div>
         </ThemeProvider>

@@ -1,9 +1,12 @@
 package com.autofix.AutoCareHub.Controllers;
 
+import com.autofix.AutoCareHub.Entities.ReceiptEntity;
 import com.autofix.AutoCareHub.Services.ReceiptService;
 import org.apache.coyote.Response;
 import org.hibernate.NonUniqueResultException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,9 +43,11 @@ public class ReceiptController {
     }
 
     @PostMapping("/patente")
-    public ResponseEntity<?> calcularTotal(@RequestParam("patente") String patente, @RequestParam("bono") Boolean applyBono ){
+    public ResponseEntity<?> calcularTotal(@RequestParam("patente") String patente,
+                                           @RequestParam("bono") Boolean applyBono,
+                                           @RequestParam(name = "bono_id", required = false) Long bono_id){
         try{
-            return ResponseEntity.ok( receiptService.calculateAmountByPatente(patente, applyBono) );
+            return ResponseEntity.ok( receiptService.calculateAmountByPatente(patente, applyBono, bono_id) );
         }catch (Exception e){
             if (e.getMessage().equals("Calculado con anterioridad")){
                 return ResponseEntity.badRequest().body("Error, ya fue calculado");
@@ -52,4 +57,20 @@ public class ReceiptController {
         }
     }
 
+   // calculateAmountByReceiptId
+   @PostMapping("/id")
+   public ResponseEntity<?> calcularTotalById(@RequestParam("id") Long id,
+                                          @RequestParam("bono") Boolean applyBono,
+                                          @RequestParam(name = "bono_id", required = false) Long bono_id){
+       try{
+           return ResponseEntity.ok( receiptService.calculateAmountByReceiptId(id, applyBono, bono_id) );
+       }catch (Exception e){
+           return ResponseEntity.badRequest().body(e.getMessage());
+       }
+   }
+
+   @PutMapping("/")
+    public ResponseEntity<?> payRecipt(@RequestParam Long id){
+        return new ResponseEntity<>(receiptService.paidReceipt(id), HttpStatus.ACCEPTED);
+   }
 }

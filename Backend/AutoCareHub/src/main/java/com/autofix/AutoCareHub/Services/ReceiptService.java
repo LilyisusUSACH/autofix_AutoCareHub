@@ -49,7 +49,7 @@ public class ReceiptService {
 
         // find all by patente
     public ArrayList<ReceiptEntity> findAllReceiptsByPatente(String patente){
-        return (ArrayList<ReceiptEntity>) receiptRepository.findAllByPatente_Patente(patente);
+        return (ArrayList<ReceiptEntity>) receiptRepository.findAllByPatente_PatenteOrderByIdDesc(patente);
     }
 
         // find by Id
@@ -59,7 +59,7 @@ public class ReceiptService {
 
         // find by patente
     public Optional<ReceiptEntity> findReceiptByPatente(String patente){
-        return receiptRepository.findByPatente_Patente(patente);
+        return receiptRepository.findByPatente_PatenteOrderByPagadoDesc(patente);
     }
     //
     public Optional<ReceiptEntity> findReceiptUnpaidByPatente(String patente){
@@ -87,7 +87,7 @@ public class ReceiptService {
     }
 
     public ReceiptEntity saveReceipt(ReceiptEntity receipt){
-        receiptRepository.save(receipt);
+        receiptRepository.saveAndFlush(receipt);
         return receipt;
     }
 
@@ -240,7 +240,7 @@ public class ReceiptService {
         return Math.round( costoReparaciones * (diference * 0.05f));
     }
 
-    public ReceiptEntity calculateAmountByPatente(String patente, Boolean applyBono) throws Exception {
+    public ReceiptEntity calculateAmountByPatente(String patente, Boolean applyBono, Long id_bono) throws Exception {
         Optional<ReceiptEntity> optionalReceipt = findReceiptUnpaidByPatente(patente);
         if(optionalReceipt.isEmpty()){
             throw new Exception("No hay recibos pendientes");
@@ -259,16 +259,35 @@ public class ReceiptService {
 
         int discounts = nReparationsDiscount(receipt,sumaRep) +
                 ingresoDiscount(receipt, sumaRep);
-        if(applyBono || receipt.getBono()==null) {
-            Optional<BonoEntity> bono = bonoService.findBonoDisponibleByMarca(receipt.getPatente().getMarca());
+        if(applyBono) { //
+            Optional<BonoEntity> bono;
+            if(id_bono == null) {
+                bono = bonoService.findBonoDisponibleByMarca(receipt.getPatente().getMarca());
+            }else{
+                bono = bonoService.findBonoById(id_bono);
+                if (bono.isPresent() && bono.get().getUsado()) bono = Optional.empty();
+            }
+            if(bono.isPresent() && receipt.getBono()!= null && !receipt.getBono().equals(bono.get())){
+                DetailEntity detailFound =  receipt.getDetails().stream().filter( detail -> detail.getDescription().equals(EDiscountsRecharges.descuento_bono) ).findFirst().orElseThrow();
+                receipt.getDetails().remove(detailFound);
+                detailService.deleteDetail(detailFound.getId());
+                receipt.getBono().setUsado(false);
+                receipt.getBono().setReceipt(null);
+                receipt.setBono(null);
+            }
             if (bono.isPresent()) {
                 discounts += bonoService.useBono(bono.get(), receipt); // TODO: hacer esto cuando termine el bono service
                 detailService.createDetail(EDiscountsRecharges.descuento_bono,
                         -1*bono.get().getAmount(), -1, receipt);
             }
         }
-        if(receipt.getBono()!=null){
-            discounts += receipt.getBono().getAmount();
+        else{
+                DetailEntity detailFound =  receipt.getDetails().stream().filter( detail -> detail.getDescription().equals(EDiscountsRecharges.descuento_bono) ).findFirst().orElseThrow();
+                receipt.getDetails().remove(detailFound);
+                detailService.deleteDetail(detailFound.getId());
+                receipt.getBono().setUsado(false);
+                receipt.getBono().setReceipt(null);
+                receipt.setBono(null);
         }
         int recargos = kmRecargo(receipt, sumaRep) +
                 oldRecargo(receipt, sumaRep) +
@@ -284,6 +303,102 @@ public class ReceiptService {
     //     public ReceiptEntity calculateAmountByReceipt(ReceiptEntity receipt){
     // delete
 
+    public ReceiptEntity calculateAmountByReceiptId(Long id, Boolean applyBono, Long id_bono) throws Exception {
+        Optional<ReceiptEntity> optionalReceipt = findReceiptById(id);
+        if(optionalReceipt.isEmpty()){
+            throw new Exception("No hay recibos pendientes");
+        }
+        ReceiptEntity receipt = optionalReceipt.get();
+        if(receipt.getCostoTotal()>0) {
+            receipt.setCostoTotal(0);
+        };
+        int sumaRep = receipt.getReparaciones().stream().mapToInt(ReparationEntity::getMontoTotal).sum();
+//        for (ReparationEntity reparation : receipt.getReparaciones()) {
+//            sumaRep += reparation.getMontoTotal();
+//        }
+        detailService.createDetail(EDiscountsRecharges.suma_reparacion,
+                sumaRep, 1, receipt);
+        //receipt.getDetail().add("La suma de las reparaciones es :");
+
+        int discounts = nReparationsDiscount(receipt,sumaRep) +
+                ingresoDiscount(receipt, sumaRep);
+        if(applyBono) { //
+            Optional<BonoEntity> bono;
+            if(id_bono == null) {
+                bono = bonoService.findBonoDisponibleByMarca(receipt.getPatente().getMarca());
+            }else{
+                bono = bonoService.findBonoById(id_bono);
+                if (bono.isPresent() && bono.get().getUsado() && !bono.get().equals(receipt.getBono())) bono = Optional.empty();
+            }
+            if( bono.isPresent() && receipt.getBono()!=null ){
+                Optional<DetailEntity> detailFound =  receipt.getDetails()
+                        .stream().filter( detail -> detail.getDescription().equals(EDiscountsRecharges.descuento_bono) )
+                        .findFirst();
+                if(detailFound.isPresent()){
+                    receipt.getDetails().remove(detailFound.get());
+                    detailService.deleteDetail(detailFound.get().getId());
+                    receipt.getBono().setUsado(false);
+                    receipt.getBono().setReceipt(null);
+                    receipt.setBono(null);
+                }
+            }
+//            if(bono.isPresent() && receipt.getBono()!= null && !receipt.getBono().equals(bono.get())){
+//                DetailEntity detailFound =  receipt.getDetails().stream().filter( detail -> detail.getDescription().equals(EDiscountsRecharges.descuento_bono) ).findFirst().orElseThrow();
+//                receipt.getDetails().remove(detailFound);
+//                detailService.deleteDetail(detailFound.getId());
+//                receipt.getBono().setUsado(false);
+//                receipt.getBono().setReceipt(null);
+//                receipt.setBono(null);
+//            }
+            if (bono.isPresent()) {
+                discounts += bonoService.useBono(bono.get(), receipt); // TODO: hacer esto cuando termine el bono service
+                detailService.createDetail(EDiscountsRecharges.descuento_bono,
+                        -1*bono.get().getAmount(), -1, receipt);
+            }
+        }
+        else{
+            if(receipt.getBono()!=null){
+                Optional<DetailEntity> detailFound =  receipt.getDetails()
+                        .stream().filter( detail -> detail.getDescription().equals(EDiscountsRecharges.descuento_bono) )
+                        .findFirst();
+                if(detailFound.isPresent()){
+                    receipt.getDetails().remove(detailFound.get());
+                    detailService.deleteDetail(detailFound.get().getId());
+                    receipt.getBono().setUsado(false);
+                    receipt.getBono().setReceipt(null);
+                    receipt.setBono(null);
+                }
+            }
+        }
+        int recargos = kmRecargo(receipt, sumaRep) +
+                oldRecargo(receipt, sumaRep) +
+                retrasoRecargo(receipt, sumaRep);
+        int costoTotal =  (sumaRep - discounts + recargos);
+        detailService.createDetail(EDiscountsRecharges.iva,
+                Math.round(costoTotal*IVA), IVA, receipt);
+        costoTotal = Math.round(costoTotal*(1+IVA));
+        receipt.setCostoTotal(costoTotal);
+        saveReceipt(receipt);
+        return receipt;
+    }
+
+    public ReceiptEntity updateReceipt(ReceiptEntity receipt){
+        return receiptRepository.saveAndFlush(receipt);
+    }
+
+    public ReceiptEntity paidReceipt(Long id){
+            Optional<ReceiptEntity> receipt = receiptRepository.findById(id);
+            if(receipt.isPresent()){
+                receipt.get().setPagado(true);
+                receipt.get().setRetirado(true);
+                receipt.get().getReparaciones().forEach( reparation -> {
+                    reparation.setFechaRetiro(LocalDate.now());
+                    reparation.setHoraRetiro(LocalTime.now());
+                });
+                receiptRepository.save(receipt.get());
+            }
+            return receipt.orElseGet(() -> null);
+    }
     public boolean deleteReceipt(Long id){
         try{
             receiptRepository.deleteById(id);

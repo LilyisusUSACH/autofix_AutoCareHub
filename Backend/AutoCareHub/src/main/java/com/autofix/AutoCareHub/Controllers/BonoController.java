@@ -24,6 +24,11 @@ public class BonoController {
         return ResponseEntity.ok( bonoService.findBonosByMarca(marca) );
     }
 
+    @GetMapping("/marcaDisp")
+    public ResponseEntity<?> getBonosDispoByMarca(@RequestParam("marca") String marca){
+        return ResponseEntity.ok( bonoService.findBonosDispoByMarca(marca) );
+    }
+
     @PostMapping("/")
     public ResponseEntity<?> addNewBono(@RequestBody AddNewBonoDTO bonoDTO){
         return ResponseEntity.ok(bonoService.createNewBono(bonoDTO));

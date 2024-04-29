@@ -24,8 +24,16 @@ public class BonoService {
         return bonoRepository.getAllByMarca(marca);
     }
 
+    public ArrayList<BonoEntity> findBonosDispoByMarca(String marca){
+        return bonoRepository.findAllByMarcaAndUsadoIsFalseOrderByAmountDesc(marca);
+    }
+
+    public Optional<BonoEntity> findBonoById(Long id){
+        return bonoRepository.findById(id);
+    }
+
     public Optional<BonoEntity> findBonoDisponibleByMarca(String marca){
-        return bonoRepository.getFirstByMarcaAndUsadoIsFalse(marca);
+        return bonoRepository.getFirstByMarcaAndUsadoIsFalseOrderByAmountDesc(marca);
     }
 
     public int useBono(BonoEntity bono, ReceiptEntity receipt){

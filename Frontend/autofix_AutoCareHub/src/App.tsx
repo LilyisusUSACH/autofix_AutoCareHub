@@ -3,6 +3,7 @@ import './App.css'
 import WorkshopRouter from './routers/WorkshopRouter'
 import ClientRouter from './routers/ClientRouter'
 import MyVehicleRouter from './routers/MyVehicleRouter'
+import PosRouter from './routers/PosRouter'
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
           <div>
             <Routes>
               <Route path="/Workshop/*" element={<WorkshopRouter/>} />
+              <Route path='/Pos/*' element={<PosRouter/>}/>
               <Route path='/MyVehicle/*' element={<MyVehicleRouter/>}/>
               <Route path="/*" element={<ClientRouter/>}/>
             </Routes>

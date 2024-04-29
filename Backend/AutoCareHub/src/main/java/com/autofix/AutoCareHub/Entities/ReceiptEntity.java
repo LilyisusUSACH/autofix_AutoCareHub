@@ -37,7 +37,7 @@ public class ReceiptEntity {
     //@CollectionTable(name="detalles")
     //private ArrayList<Integer> detail = new ArrayList<Integer>();
 
-    @OneToMany(mappedBy = "receipt")
+    @OneToMany(mappedBy = "receipt",cascade = CascadeType.MERGE)
     private List<DetailEntity> details = new ArrayList<>();
 
     private Boolean retirado;

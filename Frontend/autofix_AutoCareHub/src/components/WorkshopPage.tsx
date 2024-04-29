@@ -87,7 +87,7 @@ const columns: ColumnData[] = [
 // TODO: arreglar fuentes
 const Fila = (props: { style: object; index: number; row: Reparation, onComplete:unknown, onCancel:unknown }) => {
   const { style, index, row, onComplete, onCancel } = props;
-  console.log(typeof(onComplete));
+  //console.log(typeof(onComplete));
   return (
     <>
       <TableCell sx={style} align="center" component="th" scope="row">
@@ -109,7 +109,7 @@ const Fila = (props: { style: object; index: number; row: Reparation, onComplete
         sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
         align="center"
       >
-        {repTypes[row.typeRep]}
+        {repTypes[row.typeRep-1]}
       </TableCell>
       <TableCell
         sx={{ background: index % 2 == 0 ? "lightgrey" : "white" }}
@@ -180,7 +180,7 @@ const WorkshopPage = () => {
       { variant:'error'});
 
     workshopService.deleteReparation(id).then((response) =>{
-      console.log(response);
+      //console.log(response);
       init();
     }
     );
@@ -188,7 +188,7 @@ const WorkshopPage = () => {
 
   const onCompleteRep = (id:number) => {
     workshopService.completeReparation(id).then((response) =>{
-      console.log(response);
+      //(response);
       enqueueSnackbar("Se completo la reparación", {variant:'info'})
       init();
     }
@@ -241,6 +241,7 @@ const WorkshopPage = () => {
   };
 
   const handleSearch = (valorBuscado: string) => {
+    console.log(reparations)
     const filasFiltradas = reparations.filter((fila) => {
       return (
         fila.vehiculo.patente
@@ -252,7 +253,7 @@ const WorkshopPage = () => {
         fila.vehiculo.modelo
           .toLowerCase()
           .includes(valorBuscado.toLowerCase()) ||
-        repTypes[fila.typeRep]
+        repTypes[fila.typeRep-1]
           .toLowerCase()
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "")
