@@ -15,6 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReportesController {
     @Autowired
     ReportesService reportesService;
+    @GetMapping("/r1")
+    public ResponseEntity<?> getR1(){
+        return new ResponseEntity<>(reportesService.getR1(), HttpStatus.OK);
+    }
     @GetMapping("/r2")
     public ResponseEntity<?> getR2(){
         return new ResponseEntity<>(reportesService.getR2(), HttpStatus.OK);

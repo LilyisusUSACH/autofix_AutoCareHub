@@ -23,6 +23,7 @@ import HistoryIcon from "@mui/icons-material/History";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
 import CardGiftcardOutlinedIcon from "@mui/icons-material/CardGiftcardOutlined";
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 
 const NavBarVariantWork = () => {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ const NavBarVariantWork = () => {
   type option = {
     text: string;
     icon: ReactElement;
+    redirect: string;
   };
 
   // incluir el redireccion
@@ -43,23 +45,33 @@ const NavBarVariantWork = () => {
     {
       text: "Reparaciones activas",
       icon: <CarRepairIcon />,
+      redirect: "/workshop/",
     },
     {
       text: "Historial Reparaciones",
       icon: <HistoryIcon />,
+      redirect: "/workshop/history",
     },
     {
       text: "Historial Recibos",
       icon: <ReceiptLongOutlinedIcon />,
+      redirect: "/pos/boletas/"
     },
     {
       text: "Ventas",
       icon: <PaidOutlinedIcon />,
+      redirect: "/pos/",
     },
     {
       text: "Bonos",
       icon: <CardGiftcardOutlinedIcon />,
+      redirect: "/pos/bonos",
     },
+    {
+      text:"Ingresar Vehiculo",
+      icon: <DirectionsCarIcon />,
+      redirect: "/workshop/newVehicle"
+    }
   ];
 
   const drawer = (
@@ -103,33 +115,37 @@ const NavBarVariantWork = () => {
           }}
         />
       </Box>
-      <List sx={{
-        '& .MuiSvgIcon-root': {
-          fontSize: 45,
-          color:'black.main',
-        },
-      }}>
+      <List
+        sx={{
+          "& .MuiSvgIcon-root": {
+            fontSize: 45,
+            color: "black.main",
+          },
+        }}
+      >
         {options.map((option, index) => (
           <Box key={index}>
             <ListItem key={index} disablePadding>
-              <ListItemButton>
+              <ListItemButton onClick={() => navigate(option.redirect)}>
                 <ListItemIcon>{option.icon}</ListItemIcon>
-                <ListItemText 
-                primaryTypographyProps={{
-                  fontSize: 20,
-                  fontWeight:10,
-                  lineHeight: '1'
-                }}
-                  primary={option.text} />
+                <ListItemText
+                  primaryTypographyProps={{
+                    fontSize: 20,
+                    fontWeight: 10,
+                    lineHeight: "1",
+                  }}
+                  primary={option.text}
+                />
               </ListItemButton>
             </ListItem>
             <Divider
               variant="middle"
               sx={{
-                display:(index==0 ||   index==(options.length-1))?'none':'',
+                display:
+                  index == 0 || index == options.length - 1 ? "none" : "",
                 mt: "2%",
                 borderBottomWidth: "1px",
-                opacity: (index==(options.length-1))?1:0.5,
+                opacity: index == options.length - 1 ? 1 : 0.5,
                 background: "black",
               }}
             />
@@ -160,10 +176,12 @@ const NavBarVariantWork = () => {
           sx={{ mr: 2, position: "absolute", left: "10%" }}
           onClick={toggleDrawer(true)}
         >
-          <MenuIcon sx={{
-            fontSize: 35,
-            color:'black.main',
-          }}/>
+          <MenuIcon
+            sx={{
+              fontSize: 35,
+              color: "black.main",
+            }}
+          />
         </IconButton>
         <Drawer open={open} onClose={toggleDrawer(false)}>
           {drawer}

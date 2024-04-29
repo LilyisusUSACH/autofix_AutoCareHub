@@ -24,7 +24,7 @@ import HistoryIcon from "@mui/icons-material/History";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
 import CardGiftcardOutlinedIcon from "@mui/icons-material/CardGiftcardOutlined";
-
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 const NavBarVariantPos = () => {
   const navigate = useNavigate();
 
@@ -37,6 +37,7 @@ const NavBarVariantPos = () => {
   type option = {
     text: string;
     icon: ReactElement;
+    redirect: string;
   };
 
   // incluir el redireccion
@@ -44,23 +45,34 @@ const NavBarVariantPos = () => {
     {
       text: "Reparaciones activas",
       icon: <CarRepairIcon />,
+      redirect: "/workshop/"
     },
     {
       text: "Historial Reparaciones",
       icon: <HistoryIcon />,
+      redirect: "/workshop/history"
     },
     {
       text: "Historial Recibos",
       icon: <ReceiptLongOutlinedIcon />,
+      redirect: "/pos/boletas/"
     },
     {
       text: "Ventas",
       icon: <PaidOutlinedIcon />,
+      redirect: "/pos/"
+
     },
     {
       text: "Bonos",
       icon: <CardGiftcardOutlinedIcon />,
+      redirect: "/pos/bonos"
     },
+    {
+      text:"Ingresar Vehiculo",
+      icon: <DirectionsCarIcon />,
+      redirect: "/workshop/newVehicle"
+    }
   ];
 
   const drawer = (
@@ -111,7 +123,7 @@ const NavBarVariantPos = () => {
         },
       }}>
         {options.map((option, index) => (
-          <Box key={index}>
+          <Box key={index} onClick={() => navigate(option.redirect)}>
             <ListItem key={index} disablePadding>
               <ListItemButton>
                 <ListItemIcon>{option.icon}</ListItemIcon>
@@ -127,7 +139,7 @@ const NavBarVariantPos = () => {
             <Divider
               variant="middle"
               sx={{
-                display:(index==0 ||   index==(options.length-1))?'none':'',
+                display:(index==0 || index==(options.length-1))?'none':'',
                 mt: "2%",
                 borderBottomWidth: "1px",
                 opacity: (index==(options.length-1))?1:0.5,

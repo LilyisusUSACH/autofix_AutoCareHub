@@ -1,5 +1,6 @@
 package com.autofix.AutoCareHub.Services;
 
+import com.autofix.AutoCareHub.Controllers.Request.R1DTO;
 import com.autofix.AutoCareHub.Controllers.Request.R2DTO;
 import com.autofix.AutoCareHub.Controllers.Request.R3DTO;
 import com.autofix.AutoCareHub.Controllers.Request.R4DTO;
@@ -13,6 +14,10 @@ import java.util.List;
 public class ReportesService {
     @Autowired
     ReportesRepository reportesRepository;
+
+    public List<R1DTO> getR1(){
+        return reportesRepository.findR1();
+    }
 
     public List<R2DTO> getR2(){
         return reportesRepository.findR2();

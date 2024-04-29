@@ -32,7 +32,7 @@ import { TableComponents, TableVirtuoso } from "react-virtuoso";
 import { Link, useNavigate } from "react-router-dom";
 import { closeSnackbar, enqueueSnackbar, VariantType } from "notistack";
 import { Reparation, Vehicle, ColumnData } from "../types/types";
-import { formatCurrency } from '../utils/utils';
+import { formatCurrency } from "../utils/utils";
 
 // TODO: Separar Por componentes lo que se pueda
 
@@ -105,40 +105,44 @@ const ExpandableRow = ({ context, item: user, ...restProps }) => {
                 <Divider></Divider>
                 <Grid container justifyContent={"space-around"}>
                   <Grid item xs={2}>
-                    <IconButton
-                      sx={{
-                        margin: "auto",
-                        my: "10px",
-                        width: "fit-content",
-                        border: "1px solid black",
-                        color: "#000000FF",
-                        backgroundColor: "#25D8B7",
-                        "&:hover": {
+                    <Link to={"/pos/boletas/" + user.receipt_id}>
+                      <IconButton
+                        sx={{
+                          margin: "auto",
+                          my: "10px",
+                          width: "fit-content",
+                          border: "1px solid black",
+                          color: "#000000FF",
                           backgroundColor: "#25D8B7",
-                          filter: "brightness(90%)",
-                        },
-                      }}
-                    >
-                      <ReceiptLongIcon fontSize="large" />
-                    </IconButton>
+                          "&:hover": {
+                            backgroundColor: "#25D8B7",
+                            filter: "brightness(90%)",
+                          },
+                        }}
+                      >
+                        <ReceiptLongIcon fontSize="large" />
+                      </IconButton>
+                    </Link>
                   </Grid>
                   <Grid item xs={3}>
-                    <IconButton
-                      sx={{
-                        margin: "auto",
-                        my: "10px",
-                        width: "fit-content",
-                        border: "1px solid black",
-                        color: "#000000FF",
-                        backgroundColor: "#FF4090",
-                        "&:hover": {
+                    <Link to={"/pos/vehiculo/" + user.vehiculo.id}>
+                      <IconButton
+                        sx={{
+                          margin: "auto",
+                          my: "10px",
+                          width: "fit-content",
+                          border: "1px solid black",
+                          color: "#000000FF",
                           backgroundColor: "#FF4090",
-                          filter: "brightness(90%)",
-                        },
-                      }}
-                    >
-                      <CarRepairIcon fontSize="large" />
-                    </IconButton>
+                          "&:hover": {
+                            backgroundColor: "#FF4090",
+                            filter: "brightness(90%)",
+                          },
+                        }}
+                      >
+                        <CarRepairIcon fontSize="large" />
+                      </IconButton>
+                    </Link>
                   </Grid>
                   <Grid item xs={3}>
                     <Typography
@@ -219,12 +223,14 @@ const Fila = (props: { expanded: boolean; row: Reparation }) => {
       </TableCell>
       <TableCell align="center">{row.vehiculo.marca.toUpperCase()}</TableCell>
       <TableCell align="center">{row.vehiculo.modelo.toUpperCase()}</TableCell>
-      <TableCell align="center">{repTypes[row.typeRep-1]}</TableCell>
+      <TableCell align="center">{repTypes[row.typeRep - 1]}</TableCell>
       <TableCell align="center">
         {row.fechaIngreso + " " + row.horaIngreso.slice(0, 5)}
       </TableCell>
       <TableCell align="center">
-        {row.fechaSalida? row.fechaSalida + " " + row.horaSalida : "Aun en taller"}
+        {row.fechaSalida
+          ? row.fechaSalida + " " + row.horaSalida
+          : "Aun en taller"}
       </TableCell>
       <TableCell align="center">
         <IconButton
@@ -291,7 +297,7 @@ const WorkshopHistoryPage = () => {
         fila.vehiculo.modelo
           .toLowerCase()
           .includes(valorBuscado.toLowerCase()) ||
-        repTypes[fila.typeRep-1]
+        repTypes[fila.typeRep - 1]
           .toLowerCase()
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "")
@@ -344,7 +350,7 @@ const WorkshopHistoryPage = () => {
           >
             <Grid item xs={12} sm={5} md={4}>
               <Typography fontWeight={800} variant="h5">
-                Reparaciones activas
+                Historial Reparaciones
                 <Divider
                   variant="fullWidth"
                   sx={{

@@ -7,8 +7,27 @@ import {
   Divider,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
+import { useState } from "react";
+import vehicleService from "../services/vehicle.service";
+import { Link, useNavigate } from "react-router-dom";
+import { enqueueSnackbar } from "notistack";
 
 const PosPage = () => {
+  const [patente, setPatente] = useState("");
+  const navigate = useNavigate();
+  const handleClick = () => {
+    vehicleService
+      .getVehicleByPatente(patente.toLowerCase())
+      .then((response) => {
+        navigate("/pos/vehiculo/" + response.data.id);
+        enqueueSnackbar("Vehiculo encontrado", { variant: "info" });
+      })
+      .catch(() => {
+        enqueueSnackbar("Patente de Vehiculo No Encontrado", {
+          variant: "error",
+        });
+      });
+  };
   return (
     <Grid
       container
@@ -82,13 +101,15 @@ const PosPage = () => {
                     style: { letterSpacing: "20px" },
                   }}
                   //onChange={handleChange}
-                  //value={pat}
+                  onChange={(event) => setPatente(event.target.value)}
+                  value={patente.toUpperCase()}
                   label="Patente"
                   variant="filled"
                   size="small"
                 />
                 <IconButton
                   //onClick={getStatus}
+                  onClick={handleClick}
                   sx={{
                     ml: "1rem",
                     mt: "0.2rem",
@@ -213,28 +234,30 @@ const PosPage = () => {
               >
                 {"Reporte 1:"} <br /> {"Detalle de costos por cada vehiculo"}
               </Typography>
-              <IconButton
-                //onClick={getStatus}
-                sx={{
-                  width: "40px",
-                  height: "40px",
-                  border: "0.5px solid black",
-                  backgroundColor: "#1EBD96",
-                  "&:hover": {
-                    backgroundColor: "#1EBD96",
-                    filter: "brightness(110%)",
-                  },
-                }}
-              >
-                <SendIcon
+              <Link to="/pos/reporte/1">
+                <IconButton
+                  //onClick={getStatus}
                   sx={{
-                    color: "white",
-                    strokeOpacity: "1",
-                    strokeWidth: "0.5px",
-                    stroke: "black",
+                    width: "40px",
+                    height: "40px",
+                    border: "0.5px solid black",
+                    backgroundColor: "#1EBD96",
+                    "&:hover": {
+                      backgroundColor: "#1EBD96",
+                      filter: "brightness(110%)",
+                    },
                   }}
-                />
-              </IconButton>
+                >
+                  <SendIcon
+                    sx={{
+                      color: "white",
+                      strokeOpacity: "1",
+                      strokeWidth: "0.5px",
+                      stroke: "black",
+                    }}
+                  />
+                </IconButton>
+              </Link>
               <Divider
                 sx={{
                   borderBottomWidth: "1px",
@@ -251,28 +274,30 @@ const PosPage = () => {
                 {"Reporte 2:"} <br />{" "}
                 {"Tipo de reparacion segun tipo de vehiculo"}
               </Typography>
-              <IconButton
-                //onClick={getStatus}
-                sx={{
-                  width: "40px",
-                  height: "40px",
-                  border: "0.5px solid black",
-                  backgroundColor: "#1EBD96",
-                  "&:hover": {
-                    backgroundColor: "#1EBD96",
-                    filter: "brightness(110%)",
-                  },
-                }}
-              >
-                <SendIcon
+              <Link to="/pos/reporte/2">
+                <IconButton
+                  //onClick={getStatus}
                   sx={{
-                    color: "white",
-                    strokeOpacity: "1",
-                    strokeWidth: "0.5px",
-                    stroke: "black",
+                    width: "40px",
+                    height: "40px",
+                    border: "0.5px solid black",
+                    backgroundColor: "#1EBD96",
+                    "&:hover": {
+                      backgroundColor: "#1EBD96",
+                      filter: "brightness(110%)",
+                    },
                   }}
-                />
-              </IconButton>
+                >
+                  <SendIcon
+                    sx={{
+                      color: "white",
+                      strokeOpacity: "1",
+                      strokeWidth: "0.5px",
+                      stroke: "black",
+                    }}
+                  />
+                </IconButton>
+              </Link>
             </Grid>
             <Grid
               item
@@ -300,28 +325,30 @@ const PosPage = () => {
               >
                 {"Reporte 3"} <br /> {"Tiempo de reparacion promedio por marca"}
               </Typography>
-              <IconButton
-                //onClick={getStatus}
-                sx={{
-                  width: "40px",
-                  height: "40px",
-                  border: "0.5px solid black",
-                  backgroundColor: "#1EBD96",
-                  "&:hover": {
-                    backgroundColor: "#1EBD96",
-                    filter: "brightness(110%)",
-                  },
-                }}
-              >
-                <SendIcon
+              <Link to="/pos/reporte/3">
+                <IconButton
+                  //onClick={getStatus}
                   sx={{
-                    color: "white",
-                    strokeOpacity: "1",
-                    strokeWidth: "0.5px",
-                    stroke: "black",
+                    width: "40px",
+                    height: "40px",
+                    border: "0.5px solid black",
+                    backgroundColor: "#1EBD96",
+                    "&:hover": {
+                      backgroundColor: "#1EBD96",
+                      filter: "brightness(110%)",
+                    },
                   }}
-                />
-              </IconButton>
+                >
+                  <SendIcon
+                    sx={{
+                      color: "white",
+                      strokeOpacity: "1",
+                      strokeWidth: "0.5px",
+                      stroke: "black",
+                    }}
+                  />
+                </IconButton>
+              </Link>
               <Divider
                 sx={{
                   borderBottomWidth: "1px",
@@ -337,28 +364,30 @@ const PosPage = () => {
               <Typography width={"80%"}>
                 {"Reporte 4"} <br /> {"Tipo de reparacion segun tipo de motor"}
               </Typography>
-              <IconButton
-                //onClick={getStatus}
-                sx={{
-                  width: "40px",
-                  height: "40px",
-                  border: "0.5px solid black",
-                  backgroundColor: "#1EBD96",
-                  "&:hover": {
-                    backgroundColor: "#1EBD96",
-                    filter: "brightness(110%)",
-                  },
-                }}
-              >
-                <SendIcon
+              <Link to="/pos/reporte/4">
+                <IconButton
+                  //onClick={getStatus}
                   sx={{
-                    color: "white",
-                    strokeOpacity: "1",
-                    strokeWidth: "0.5px",
-                    stroke: "black",
+                    width: "40px",
+                    height: "40px",
+                    border: "0.5px solid black",
+                    backgroundColor: "#1EBD96",
+                    "&:hover": {
+                      backgroundColor: "#1EBD96",
+                      filter: "brightness(110%)",
+                    },
                   }}
-                />
-              </IconButton>
+                >
+                  <SendIcon
+                    sx={{
+                      color: "white",
+                      strokeOpacity: "1",
+                      strokeWidth: "0.5px",
+                      stroke: "black",
+                    }}
+                  />
+                </IconButton>
+              </Link>
               <Divider
                 sx={{
                   borderBottomWidth: "1px",

@@ -1,5 +1,9 @@
 import httpClient from "../http-common";
 
+const getReceipts = () => {
+    return httpClient.get(`/api/receipt/`);
+}
+
 const getReceipt = (id) => {
     return httpClient.get(`/api/receipt/${id}`);
 }
@@ -25,6 +29,7 @@ const getBonosByMarca = (marca) => {
 
 export default {
     getReceipt,
+    getReceipts,
     getReceiptsByPatente,
     getBonosByMarca,
     postCalculate,

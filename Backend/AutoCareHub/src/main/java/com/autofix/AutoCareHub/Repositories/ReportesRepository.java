@@ -1,5 +1,6 @@
 package com.autofix.AutoCareHub.Repositories;
 
+import com.autofix.AutoCareHub.Controllers.Request.R1DTO;
 import com.autofix.AutoCareHub.Controllers.Request.R2DTO;
 import com.autofix.AutoCareHub.Controllers.Request.R3DTO;
 import com.autofix.AutoCareHub.Controllers.Request.R4DTO;
@@ -19,6 +20,19 @@ public class ReportesRepository{
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    /* R1
+    SELECT SUM(costo_total) as gastado_por_vehiculo, v.id, v.patente FROM vehiculo as v
+	INNER JOIN boleta as b on v.id = b.patente_vehiculo
+		WHERE b.pagado = true
+		 GROUP BY v.id
+     */
+    public List<R1DTO> findR1(){
+        String queryR1 = "SELECT SUM(costo_total) as gastado_por_vehiculo, v.id, v.patente FROM vehiculo as v" +
+                " INNER JOIN boleta as b on v.id = b.patente_vehiculo" +
+                " WHERE b.pagado = true" +
+                " GROUP BY v.id";
+        return jdbcTemplate.query( queryR1, (rs, rowNum) -> new R1DTO(rs.getLong("gastado_por_vehiculo"), rs.getLong("id"), rs.getString("patente") ));
+    }
     public List<R2DTO> findR2(){
         String queryR2 = "SELECT r.type_rep as tipo_de_rep , count(*) as cantidad, v.car_type as tipo_vehiculo, sum(r.monto_total) as monto_total FROM reparacion as r, boleta as b, vehiculo as v" +
                 " WHERE r.boleta = b.id and b.patente_vehiculo = v.id" +
@@ -36,7 +50,7 @@ public class ReportesRepository{
                 "   WHERE r.fecha_salida is not null" +
                 "   ) as tiempo, reparacion as r, boleta as b, vehiculo as v" +
                 "  WHERE tiempo.id = r.id and r.boleta = b.id and b.patente_vehiculo = v.id" +
-                "  GROUP BY v.marca";
+                "  GROUP BY v.marca ORDER BY promedio_reparacion";
         return jdbcTemplate.query(queryr3, (rs, rowNum) -> new R3DTO( rs.getString("promedio_reparacion"), rs.getString("marca")));
     }
 

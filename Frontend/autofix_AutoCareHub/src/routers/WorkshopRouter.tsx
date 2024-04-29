@@ -1,8 +1,7 @@
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom'
-import HelloWorld from '../components/HelloWorld';
 import NavBarVariantWork from '../components/NavBarVariantWork';
 import WorkshopPage from '../components/WorkshopPage';
-import { IconButton, ThemeProvider, colors, createTheme } from '@mui/material';
+import { IconButton, ThemeProvider, createTheme } from '@mui/material';
 import { SnackbarProvider, closeSnackbar } from 'notistack';
 import CloseIcon from "@mui/icons-material/Close";
 import React from 'react';

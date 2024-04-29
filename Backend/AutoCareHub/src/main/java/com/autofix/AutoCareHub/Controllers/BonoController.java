@@ -19,6 +19,11 @@ public class BonoController {
         return ResponseEntity.ok( bonoService.getAllBonos() );
     }
 
+    @GetMapping("/disp")
+    public ResponseEntity<?> getAllBonosDisp(){
+        return ResponseEntity.ok( bonoService.getAllBonosDisp() );
+    }
+
     @GetMapping("/marca")
     public ResponseEntity<?> getBonosByMarca(@RequestParam("marca") String marca){
         return ResponseEntity.ok( bonoService.findBonosByMarca(marca) );

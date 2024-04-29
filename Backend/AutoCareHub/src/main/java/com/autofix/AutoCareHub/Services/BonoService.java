@@ -17,7 +17,11 @@ public class BonoService {
     BonoRepository bonoRepository;
 
     public ArrayList<BonoEntity> getAllBonos(){
-        return (ArrayList<BonoEntity>) bonoRepository.findAll();
+        return (ArrayList<BonoEntity>) bonoRepository.findAllByUsadoIsTrueOrderByIdDesc();
+    }
+
+    public ArrayList<BonoEntity> getAllBonosDisp(){
+        return (ArrayList<BonoEntity>) bonoRepository.findAllByUsadoIsFalseOrderByIdDesc();
     }
 
     public ArrayList<BonoEntity> findBonosByMarca(String marca){

@@ -1,11 +1,11 @@
 export interface Vehicle {
-  carType?: number;
+  carType?: string;
   fabricationYear?: string;
   id?: number | null;
   kmRecorridos?: number;
   marca?: string;
   modelo?: string;
-  motorType?: number;
+  motorType?: string;
   nasientos?: number;
   patente?: string;
 }

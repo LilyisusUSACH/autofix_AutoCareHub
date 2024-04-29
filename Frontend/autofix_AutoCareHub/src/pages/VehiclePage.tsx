@@ -1,24 +1,9 @@
-import Checkbox from "@mui/material/Checkbox";
-import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { formatCurrency, formatPhrase } from "../utils/utils";
 import {
-  Autocomplete,
-  Box,
   Button,
-  Dialog,
-  DialogTitle,
   Divider,
   Grid,
   IconButton,
-  InputBase,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
   Paper,
-  Popover,
   Table,
   TableBody,
   TableCell,
@@ -28,91 +13,63 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useNavigate, useParams } from "react-router-dom";
-import { light } from "@mui/material/styles/createPalette";
+import { useNavigate, useParams, redirect } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Label, Translate } from "@mui/icons-material";
 import SendIcon from "@mui/icons-material/Send";
 import receiptService from "../services/receipt.service";
-import { Bono, Details, Receipt, Vehicle } from "../types/types";
-import { repTypes } from "../constants";
+import { Receipt, Vehicle } from "../types/types";
+import vehicleService from "../services/vehicle.service";
+import { enqueueSnackbar } from "notistack";
 
 const VehiclePage = () => {
   const { id } = useParams();
 
-  const [isPaid, setIsPaid] = useState(true);
-  const [uncomplete, setUncomplete] = useState(false);
-  const [datos, setDatos] = useState<Receipt>();
-  const [mostrarPantallaCompleta, setMostrarPantallaCompleta] = useState(false);
-  const [checked, setChecked] = useState(false);
-  const [bonosDisponibles, setBonosDisponibles] = useState<Bono[]>([]);
-
-  const handleAbrirPantallaCompleta = () => {
-    if (!(isPaid || uncomplete)) {
-      receiptService.getBonosByMarca(datos?.patente?.marca).then((response) => {
-        setBonosDisponibles(response.data);
-      });
-      setMostrarPantallaCompleta(true);
-    }
-  };
-
+  const [datos, setDatos] = useState<Vehicle>();
+  const [datosBoletas, setDatosBoletas] = useState<Receipt[]>([]);
   const navigate = useNavigate();
 
-  const handleCerrarPantallaCompleta = () => {
-    setMostrarPantallaCompleta(false);
+  const handleChangePatente = (event) => {
+    setDatos( (prevStatus) => ({
+      ...prevStatus,
+      patente: event.target.value.length > 6 ? event.target.value.slice(1) : event.target.value
+    }) )
   };
 
-  const handleBoleta = () => {
-    setSelectBoleta(true);
-    receiptService
-      .getReceiptsByPatente(datos?.patente?.patente?.toLocaleLowerCase())
-      .then((response) => {
-        setBoletasDisponibles(response.data);
-      });
-  };
+  const sendVehicle = () => {
 
-  const cerrarSelectBoleta = () => {
-    setSelectBoleta(false);
-  };
-
-  const handleCheck = () => {
-    return;
-  };
-
-  const init = () => {
-    receiptService.getReceipt(id).then((response) => {
-      setIsPaid(response.data.pagado);
-      setChecked(response.data.bono != null);
-      if (response.data.pagado) setDatos(response.data);
-      else
-        receiptService
-          .postCalculate(id, false, null)
-          .then((response2) => {
-            setDatos(response2.data);
-            if (response2.data.bono != null) {
-              setChecked(true);
-            }
-          })
-          .catch((error) => {
-            setDatos(response.data);
-            setUncomplete(true);
-          });
-
-      //console.log(datos);
-    });
-  };
+    vehicleService.getVehicleByPatente(datos?.patente?.toLowerCase()).then(
+      (response) => {
+        navigate('/pos/vehiculo/'+response.data.id)
+        enqueueSnackbar('Vehiculo encontrado', 
+          { variant:'info'})
+      }
+    ).catch((error) => {
+      enqueueSnackbar('Patente de Vehiculo No Encontrado', 
+          { variant:'error'})
+    } )
+  }
 
   useEffect(() => {
+    const init = () => {
+      vehicleService.getVehicleById(id).then((response) => {
+        setDatos(response.data);
+        receiptService.getReceiptsByPatente(response.data.patente).then(
+          (responseReceipt) => {
+            setDatosBoletas(responseReceipt.data)
+          }
+        )
+      });
+    };
     init();
-  }, []);
+  }, [id]);
 
   return (
     <>
       <Grid container minHeight={"89vh"}>
-        <Grid item xs={12} md={5} minHeight={"80vh"}  marginBlock={"40px"}>
+        <Grid item xs={12} md={5} minHeight={"80vh"} marginBlock={"40px"}>
           <Paper
             sx={{
-              minHeight: "80vh",
+              minHeight: "60vh",
               width: "80%",
               margin: "auto",
               borderRadius: "25px",
@@ -127,7 +84,13 @@ const VehiclePage = () => {
                 bgcolor: "black",
               }}
             />
-            <Grid container width={"90%"} height={"70vh"} justifyContent={'space-around'} margin={"auto"}>
+            <Grid
+              container
+              width={"90%"}
+              height={"60vh"}
+              justifyContent={"space-around"}
+              margin={"auto"}
+            >
               <Grid
                 item
                 sx={{
@@ -143,8 +106,9 @@ const VehiclePage = () => {
                   margin="dense"
                   variant="filled"
                   size="small"
+                  value={datos?.patente?.toUpperCase()}
+                  onChange={handleChangePatente}
                   InputProps={{
-                    readOnly: true,
                     inputProps: { style: { padding: 7 } },
                   }}
                   fullWidth
@@ -152,6 +116,30 @@ const VehiclePage = () => {
                     marginInline: "40px",
                   }}
                 ></TextField>
+
+                <IconButton
+                  //onClick={getStatus}
+                  onClick={sendVehicle}
+                  sx={{
+                    mt: "0.2rem",
+                    mr: "2rem",
+                    border: "0.5px solid black",
+                    backgroundColor: "#1EBD96",
+                    "&:hover": {
+                      backgroundColor: "#1EBD96",
+                      filter: "brightness(110%)",
+                    },
+                  }}
+                >
+                  <SendIcon
+                    sx={{
+                      color: "white",
+                      strokeOpacity: "1",
+                      strokeWidth: "0.5px",
+                      stroke: "black",
+                    }}
+                  />
+                </IconButton>
               </Grid>
               <Grid
                 item
@@ -168,6 +156,8 @@ const VehiclePage = () => {
                   margin="dense"
                   variant="filled"
                   size="small"
+                  value={datos?.modelo?.toUpperCase()}
+
                   InputProps={{
                     readOnly: true,
                     inputProps: { style: { padding: 7 } },
@@ -182,6 +172,8 @@ const VehiclePage = () => {
                   margin="dense"
                   variant="filled"
                   size="small"
+                  value={datos?.marca?.toUpperCase()}
+
                   InputProps={{
                     readOnly: true,
                     inputProps: { style: { padding: 7 } },
@@ -208,9 +200,10 @@ const VehiclePage = () => {
                   margin="dense"
                   variant="filled"
                   size="small"
+                  value={datos?.nasientos}
                   InputProps={{
                     readOnly: true,
-                    inputProps: { style: { padding: 7 } },
+                    inputProps: { style: { padding: 7, textAlign:'center'} },
                   }}
                   sx={{
                     width: "50%",
@@ -222,9 +215,10 @@ const VehiclePage = () => {
                   margin="dense"
                   variant="filled"
                   size="small"
+                  value={datos?.fabricationYear}
                   InputProps={{
                     readOnly: true,
-                    inputProps: { style: { padding: 7 } },
+                    inputProps: { style: { padding: 7, textAlign:'center' } },
                   }}
                   sx={{
                     marginRight: "40px",
@@ -248,6 +242,8 @@ const VehiclePage = () => {
                   margin="dense"
                   variant="filled"
                   size="small"
+                  value={datos?.motorType?.toUpperCase()}
+
                   InputProps={{
                     readOnly: true,
                     inputProps: { style: { padding: 7 } },
@@ -272,6 +268,7 @@ const VehiclePage = () => {
                   margin="dense"
                   variant="filled"
                   size="small"
+                  value={datos?.carType?.toUpperCase()}
                   InputProps={{
                     readOnly: true,
                     inputProps: { style: { padding: 7 } },
@@ -310,16 +307,26 @@ const VehiclePage = () => {
               <Table stickyHeader aria-label="a dense table">
                 <TableHead>
                   <TableRow>
-                    <TableCell width={"35%"}>Nombre</TableCell>
-                    <TableCell width={"20%"}>Fecha Ingreso</TableCell>
-                    <TableCell width={"20%"}>Fecha Salida</TableCell>
-                    <TableCell width={"20%"}>Fecha Retiro</TableCell>
-                    <TableCell width={"10%"} align="right">
-                      Monto
-                    </TableCell>
+                    <TableCell width={"10%"}>ID</TableCell>
+                    <TableCell width={"20%"}>Cantidad reparaciones</TableCell>
+                    <TableCell width={"20%"} align="center">Pagado</TableCell>
+                    <TableCell width={"20%"} align="center">Ir a detalle boleta</TableCell>
                   </TableRow>
                 </TableHead>
-                <TableBody></TableBody>
+                <TableBody>
+                  {datosBoletas.map( (boleta, index) => (
+                    <TableRow key={boleta.id}>
+                    <TableCell>{boleta.id}</TableCell>
+                    <TableCell align="center">{boleta.reparaciones?.length}</TableCell>
+                    <TableCell align="center">{boleta.pagado?"Ya pagado":"Aun por pagar"}</TableCell>
+                    <TableCell align="center">
+                      <Button href={"/pos/boletas/"+boleta.id} >
+                        Ver más
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                  ) )}
+                </TableBody>
               </Table>
             </TableContainer>
           </Paper>
