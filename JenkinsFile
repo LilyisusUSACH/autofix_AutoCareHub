@@ -24,7 +24,8 @@ pipeline{
                 dir("./"){
                     script{
                         withDockerRegistry(credentialsId: 'docker-credentials'){
-                            sh "docker buildx build --push --platform linux/amd64,linux/arm64 -t lilyisus/autofixcarehubbackendJenks  -f Dockerfile ."
+                            sh "docker build -t lilyisus/tingesobackend ."
+                            sh "docker push lilyisus/tingesobackend"
                         }
                     }
                 }
