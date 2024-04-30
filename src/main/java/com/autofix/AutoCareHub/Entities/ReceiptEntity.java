@@ -28,6 +28,7 @@ public class ReceiptEntity {
     private VehicleEntity patente;
 
     @OneToMany(mappedBy = "receipt")
+    @Builder.Default
     private List<ReparationEntity> reparaciones = new ArrayList<>();
 
     @OneToOne
@@ -38,6 +39,7 @@ public class ReceiptEntity {
     //private ArrayList<Integer> detail = new ArrayList<Integer>();
 
     @OneToMany(mappedBy = "receipt",cascade = CascadeType.MERGE)
+    @Builder.Default
     private List<DetailEntity> details = new ArrayList<>();
 
     private Boolean retirado;
