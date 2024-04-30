@@ -8,14 +8,14 @@ pipeline{
             steps{
                 checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/LilyisusUSACH/autofix_AutoCareHub.git']])
                 dir("./"){
-                    sh "./gradlew build"
+                    sh "sh ./gradlew build"
                 }
             }
         }
         stage("Test"){
             steps{
                 dir("./"){
-                    sh "./gradlew test"
+                    sh "sh ./gradlew test"
                 }
             }
         }
