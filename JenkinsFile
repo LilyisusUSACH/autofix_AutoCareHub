@@ -25,7 +25,7 @@ pipeline{
                     script{
                         withCredentials([string(credentialsId: 'password', variable: 'pass')]){
                             sh 'docker login -u lilyisus -p ${pass}'
-                            sh "docker buildx build --push --platform linux/amd64,linux/arm64 -t lilyisus/autofixcarehubbackendJenks  -f Dockerfile ."
+                            sh "docker buildx build --push --platform linux/amd64,linux/arm64 -t lilyisus/autofixcarehubbackendjenks  -f Dockerfile ."
                         }
                     }
                 }
